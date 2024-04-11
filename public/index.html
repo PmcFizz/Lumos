@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>古希腊掌管灯的神：阿比诺斯</title>
+  <!-- 引入 Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    .container {
+      padding-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Configure Modbus Connection</h2>
+    <form id="modbusForm">
+      <div class="form-group">
+        <label for="serialPort">Serial Port</label>
+        <input type="text" class="form-control" id="serialPort" required>
+      </div>
+      <div class="form-group">
+        <label for="deviceId">Device ID</label>
+        <input type="number" class="form-control" id="deviceId" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    <h3 class="pt-3">Registers:</h3>
+    <pre id="registers" class="bg-light p-2"></pre>
+  </div>
+
+  <!-- 引入 Bootstrap 和依赖的 Popper.js 和 jQuery -->
+  <!-- <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script> -->
+  <script>
+    document.getElementById('modbusForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const serialPort = document.getElementById('serialPort').value;
+      const deviceId = document.getElementById('deviceId').value;
+
+      fetch('/configure-modbus', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ serialPort, deviceId }),
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById('registers').textContent = JSON.stringify(data.data, null, 2);
+          } else {
+            alert('Failed to read registers: ' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    });
+  </script>
+</body>
+
+</html>
