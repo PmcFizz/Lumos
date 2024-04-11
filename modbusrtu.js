@@ -30,7 +30,5 @@ function write() {
 
 function read() {
   // 从第0个位置，读取5个寄存器的值
-  client
-    .readHoldingRegisters(10, 5)
-    .then(console.log);
+  client.readHoldingRegisters(10, 5).then(console.log);
 }

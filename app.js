@@ -6,14 +6,15 @@ const app = express();
 const port = 666;
 let interval = null;
 let ledRegisterStartAddress = 10; // 寄存器开始
-
+let currentLed = 0;
 app.use(bodyParser.json()); // 支持 JSON 编码的请求体
 app.use(express.static("public")); // 设置静态文件目录
 
 // 点亮下一个LED的函数
-function activateNextLed(currentLed, n) {
+function activateNextLed(n) {
   // 初始化所有寄存器的值为0
   let registers = new Array(n).fill(0x0000);
+  const totalLeds = n * 16;
 
   // 计算当前LED所在的寄存器索引和该寄存器内的位置
   let regIndex = Math.floor(currentLed / 16);
@@ -35,6 +36,38 @@ function activateNextLed(currentLed, n) {
       console.error(e);
     });
 }
+
+function parseRegisterValuesToLightStates(registers) {
+  let lightStates = [];
+
+  registers.forEach((register, registerIndex) => {
+    // 将寄存器值转换为16位二进制字符串
+    let binaryString = register.toString(2).padStart(16, "0");
+
+    // 遍历二进制字符串，从右向左（即从低位到高位）
+    for (let bitIndex = 0; bitIndex < binaryString.length; bitIndex++) {
+      // 计算灯的总编号
+      let lightIndex = bitIndex + 1 + registerIndex * 16;
+      // 判断当前灯的状态，true为亮（'1'），false为灭（'0'）
+      let lightState = binaryString[binaryString.length - 1 - bitIndex] === "1";
+      // 添加到结果数组
+      lightStates.push({
+        name: lightIndex.toString(),
+        index: lightIndex,
+        state: lightState,
+      });
+    }
+  });
+
+  return lightStates;
+}
+
+// 示例寄存器值
+// let registerValues = [32774, 96];
+// // 解析寄存器值并获取每个灯的状态
+// let lightsStates = parseRegisterValuesToLightStates(registerValues);
+
+// console.log("Light States:", lightsStates);
 
 // 提供一个API端点接收Modbus配置并返回寄存器值
 app.post("/configure-modbus", (req, res) => {
@@ -61,7 +94,7 @@ app.post("/configure-modbus", (req, res) => {
 // 开始循环亮灯
 app.post("/start-loop-light-sign-led", (req, res) => {
   const { registerNum = 2 } = req.body;
-  interval = setInterval(() => activateNextLed(currentLed, registerNum), 1000); // 每1000毫秒（1秒）激活下一个LED
+  interval = setInterval(() => activateNextLed(registerNum), 1000); // 每1000毫秒（1秒）激活下一个LED
   res.json({
     success: true,
     data: { interval, msg: "开始循环，单灯1秒步进亮" },
@@ -133,6 +166,26 @@ app.post("/set-light", (req, res) => {
       res.json({
         success: true,
         msg: `Light ${lightNumber} has been turned ${state ? "on" : "off"}.`,
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+      res.json({ success: false, msg: error.message });
+    });
+});
+
+// 查询灯的状态，传入寄存器数；
+app.post("/query-light", (req, res) => {
+  const { registerNum = 2 } = req.body; // 从请求体中获取灯的编号和状态
+
+  client
+    .readHoldingRegisters(ledRegisterStartAddress, registerNum)
+    .then((data) => {
+      let lightsStates = parseRegisterValuesToLightStates(data.data);
+      res.json({
+        success: true,
+        data: lightsStates,
+        msg: `query ${registerNum} start from ${ledRegisterStartAddress} `,
       });
     })
     .catch((error) => {
