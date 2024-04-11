@@ -83,6 +83,7 @@ app.post("/configure-modbus", (req, res) => {
       return client.readHoldingRegisters(0, 10);
     })
     .then((data) => {
+      // data.data = [1, 96, 1, 255, 1, 2, 0, 255, 16, 20];
       res.json({ success: true, data: data.data });
     })
     .catch((error) => {
