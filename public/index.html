@@ -7,29 +7,63 @@
   <title>古希腊掌管灯的神：阿比诺斯</title>
   <!-- 引入 Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <style>
-    .container {
-      padding-top: 20px;
-    }
-  </style>
+  <link rel="stylesheet" href="./index.css">
 </head>
 
 <body>
   <div class="container">
-    <h2>Configure Modbus Connection</h2>
-    <form id="modbusForm">
-      <div class="form-group">
-        <label for="serialPort">Serial Port</label>
-        <input type="text" class="form-control" id="serialPort" required>
+    <div class="row">
+      <div class="col-3">
+        <h4>Configure Connection</h4>
+        <form id="modbusForm">
+          <div class="form-group">
+            <label for="serialPort">Device Name:</label>
+            <input type="text" class="form-control" id="deviceName" required>
+          </div>
+          <div class="form-group">
+            <label for="serialPort">Serial Port:</label>
+            <input type="text" class="form-control" id="serialPort" required>
+          </div>
+          <div class="form-group">
+            <label for="deviceId">Modbus ID:</label>
+            <input type="number" class="form-control" id="modbusId" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+
       </div>
-      <div class="form-group">
-        <label for="deviceId">Device ID</label>
-        <input type="number" class="form-control" id="deviceId" required>
+      <div class="col-9 border p-4 border-radius">
+
+        <h4>Base Info</h4>
+        <div class="row">
+          <div class="col-3">ID: <span id="modbusId">1</span></div>
+          <div class="col-3">Baud rate : <span id="modbusId">2</span></div>
+          <div class="col-3">Work Mode: <span id="modbusId">3</span></div>
+          <div class="col-3">Brightness: <span id="modbusId">4</span></div>
+          <div class="col-3">Effective Bit: <span id="modbusId">5</span></div>
+          <div class="col-3">Output Circuits: <span id="modbusId">6</span></div>
+        </div>
+
       </div>
-      <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
-    <h3 class="pt-3">Registers:</h3>
-    <pre id="registers" class="bg-light p-2"></pre>
+    </div>
+
+
+    <!-- <div class="">
+      <h2>Configure Connection</h2>
+      <form id="modbusForm">
+        <div class="form-group">
+          <label for="serialPort">Serial Port</label>
+          <input type="text" class="form-control" id="serialPort" required>
+        </div>
+        <div class="form-group">
+          <label for="deviceId">Device ID</label>
+          <input type="number" class="form-control" id="deviceId" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div> -->
+    <!-- <h3 class="pt-3">Registers:</h3> -->
+    <!-- <pre id="registers" class="bg-light p-2"></pre> -->
   </div>
 
   <!-- 引入 Bootstrap 和依赖的 Popper.js 和 jQuery -->

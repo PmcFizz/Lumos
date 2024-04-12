@@ -1,0 +1,15 @@
+.container {
+  padding-top: 10px;
+}
+
+.border {
+  border: 1px solid #ddd;
+}
+
+.p-4 {
+  padding: 16px;
+}
+
+.border-radius {
+  border-radius: 4px;
+}

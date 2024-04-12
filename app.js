@@ -115,7 +115,7 @@ app.post("/query-device-light", async (req, res) => {
   const { deviceId } = req.body;
   const item = await db.fromPath(`/devices_detail/${deviceId}`);
   console.log(item);
-  const registerNum = item.configData[deviceConfig.outCircuitsIndex];
+  const registerNum = item.configData[deviceConfig.outputCircuitsIndex];
 
   client
     .readHoldingRegisters(deviceConfig.ledRegisterStartAddress, registerNum)

@@ -24,7 +24,7 @@ export const modbusIdIndex = 0;
 /**
  * 比特率 寄存器索引
  */
-export const bitRateIndex = 1;
+export const baudRateIndex = 1;
 
 /**
  * 工作模式 寄存器索引
@@ -44,6 +44,6 @@ export const effectiveBitIndex = 8;
 /**
  * 输出路数 寄存器索引
  */
-export const outCircuitsIndex = 9;
+export const outputCircuitsIndex = 9;
 
 // [1, 96, 1, 255, 1, 2, 0, 255, 16, 20];
