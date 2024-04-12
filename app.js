@@ -1,11 +1,14 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const ModbusRTU = require("modbus-serial");
+import { v4 as uuid } from "uuid";
+import { JsonDB, Config } from "node-json-db";
+import * as deviceConfig from "./config";
 const client = new ModbusRTU();
+const db = new JsonDB(new Config("fizzDataBase", true, false, "/"));
 const app = express();
 const port = 666;
 let interval = null;
-let ledRegisterStartAddress = 10; // 寄存器开始
 let currentLed = 0;
 app.use(bodyParser.json()); // 支持 JSON 编码的请求体
 app.use(express.static("public")); // 设置静态文件目录
@@ -28,7 +31,7 @@ function activateNextLed(n) {
 
   // 将寄存器值写入Modbus设备
   client
-    .writeRegisters(ledRegisterStartAddress, registers)
+    .writeRegisters(deviceConfig.ledRegisterStartAddress, registers)
     .then(() => {
       console.log(`Activated LED ${currentLed + 1}`);
     })
@@ -62,33 +65,71 @@ function parseRegisterValuesToLightStates(registers) {
   return lightStates;
 }
 
-// 示例寄存器值
-// let registerValues = [32774, 96];
-// // 解析寄存器值并获取每个灯的状态
-// let lightsStates = parseRegisterValuesToLightStates(registerValues);
-
-// console.log("Light States:", lightsStates);
-
 // 提供一个API端点接收Modbus配置并返回寄存器值
 app.post("/configure-modbus", (req, res) => {
-  const { serialPort, deviceId } = req.body;
+  const { serialPort, modbusId, deviceName } = req.body;
 
   client
     .connectRTUBuffered(serialPort, { baudRate: 9600 })
     .then(() => {
       console.log("Connected to Modbus device.");
-      client.setID(deviceId);
+      client.setID(modbusId);
 
       // 读取前10个寄存器的值，索引为0-9
       return client.readHoldingRegisters(0, 10);
     })
-    .then((data) => {
+    .then(async (data) => {
+      const deviceId = uuid();
+      const deviceDetailId = uuid();
+      await db.push(
+        "/devices",
+        [{ id: deviceId, deviceName, serialPort, modbusId }],
+        false
+      );
+      await db.push(
+        "/devices_detail",
+        [{ id: deviceDetailId, deviceId, deviceName, configData: data.data }],
+        false
+      );
       // data.data = [1, 96, 1, 255, 1, 2, 0, 255, 16, 20];
-      res.json({ success: true, data: data.data });
+      res.json({
+        success: true,
+        data: {
+          deviceId,
+          deviceDetailId,
+          deviceName,
+          serialPort,
+          modbusId,
+          configData: data.data,
+        },
+      });
     })
     .catch((error) => {
       console.error(error);
       res.json({ success: false, message: error.message });
+    });
+});
+
+// 查询一个设备上所有灯的状态，传入设备id；
+app.post("/query-device-light", async (req, res) => {
+  const { deviceId } = req.body;
+  const item = await db.fromPath(`/devices_detail/${deviceId}`);
+  console.log(item);
+  const registerNum = item.configData[deviceConfig.outCircuitsIndex];
+
+  client
+    .readHoldingRegisters(deviceConfig.ledRegisterStartAddress, registerNum)
+    .then((data) => {
+      let lightsStates = parseRegisterValuesToLightStates(data.data);
+      res.json({
+        success: true,
+        data: lightsStates,
+        msg: `query ${registerNum} start from ${deviceConfig.ledRegisterStartAddress} `,
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+      res.json({ success: false, msg: error.message });
     });
 });
 
@@ -117,7 +158,7 @@ app.post("/light-all-led", (req, res) => {
   let registers = new Array(registerNum).fill(0xffff);
   // 将寄存器值写入Modbus设备
   client
-    .writeRegisters(ledRegisterStartAddress, registers)
+    .writeRegisters(deviceConfig.ledRegisterStartAddress, registers)
     .then(() => {
       res.json({ success: true, data: { interval, msg: "全部灯已点亮" } });
     })
@@ -133,7 +174,7 @@ app.post("/extinguish-all-led", (req, res) => {
   let registers = new Array(registerNum).fill(0x0000);
   // 将寄存器值写入Modbus设备
   client
-    .writeRegisters(ledRegisterStartAddress, registers)
+    .writeRegisters(deviceConfig.ledRegisterStartAddress, registers)
     .then(() => {
       res.json({ success: true, data: { interval, msg: "全部灯已熄灭" } });
     })
@@ -147,7 +188,7 @@ app.post("/extinguish-all-led", (req, res) => {
 app.post("/set-light", (req, res) => {
   const { lightNumber, state } = req.body; // 从请求体中获取灯的编号和状态
   let registerAddress = Math.floor((lightNumber - 1) / 16); // 计算寄存器地址
-  registerAddress = registerAddress + ledRegisterStartAddress;
+  registerAddress = registerAddress + deviceConfig.ledRegisterStartAddress;
   const bitPosition = (lightNumber - 1) % 16; // 计算在寄存器中的位位置
 
   client
@@ -180,7 +221,7 @@ app.post("/query-light", (req, res) => {
   const { registerNum = 2 } = req.body; // 从请求体中获取灯的编号和状态
 
   client
-    .readHoldingRegisters(ledRegisterStartAddress, registerNum)
+    .readHoldingRegisters(deviceConfig.ledRegisterStartAddress, registerNum)
     .then((data) => {
       let lightsStates = parseRegisterValuesToLightStates(data.data);
       res.json({
