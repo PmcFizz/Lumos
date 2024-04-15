@@ -17,7 +17,7 @@
         <h4>Configure Connection</h4>
         <form id="modbusForm">
           <div class="form-group">
-            <label for="serialPort">Device Name:</label>
+            <label for="deviceName">Device Name:</label>
             <input type="text" class="form-control" id="deviceName" required>
           </div>
           <div class="form-group">
@@ -25,10 +25,16 @@
             <input type="text" class="form-control" id="serialPort" required>
           </div>
           <div class="form-group">
-            <label for="deviceId">Modbus ID:</label>
+            <label for="modbusId">Modbus ID:</label>
             <input type="number" class="form-control" id="modbusId" required>
           </div>
           <button type="submit" class="btn btn-primary">Submit</button>
+          <button type="button" id="query-btn" class="btn btn-primary">Query LED Status </button>
+
+          <button type="button" id="all-on-btn" class="btn btn-primary">All On</button>
+          <button type="button" id="all-off-btn" class="btn btn-primary">All Off</button>
+          <button type="button" id="start-loop-btn" class="btn btn-primary">Start Loop</button>
+          <button type="button" id="stop-loop-btn" class="btn btn-primary">Stop Loop</button>
         </form>
 
       </div>
@@ -36,34 +42,18 @@
 
         <h4>Base Info</h4>
         <div class="row">
-          <div class="col-3">ID: <span id="modbusId">1</span></div>
-          <div class="col-3">Baud rate : <span id="modbusId">2</span></div>
-          <div class="col-3">Work Mode: <span id="modbusId">3</span></div>
-          <div class="col-3">Brightness: <span id="modbusId">4</span></div>
-          <div class="col-3">Effective Bit: <span id="modbusId">5</span></div>
-          <div class="col-3">Output Circuits: <span id="modbusId">6</span></div>
+          <div class="col-3">ID: <span id="config_modbusId">1</span></div>
+          <div class="col-3">Baud rate : <span id="config_baudRate">2</span></div>
+          <div class="col-3">Work Mode: <span id="config_workMode">3</span></div>
+          <div class="col-3">Brightness: <span id="config_brightness">4</span></div>
+          <div class="col-3">Effective Bit: <span id="config_effectiveBit">5</span></div>
+          <div class="col-3">Output Circuits: <span id="config_outputCircuits">6</span></div>
         </div>
+        <div class="row" id="led-container"></div>
 
       </div>
     </div>
 
-
-    <!-- <div class="">
-      <h2>Configure Connection</h2>
-      <form id="modbusForm">
-        <div class="form-group">
-          <label for="serialPort">Serial Port</label>
-          <input type="text" class="form-control" id="serialPort" required>
-        </div>
-        <div class="form-group">
-          <label for="deviceId">Device ID</label>
-          <input type="number" class="form-control" id="deviceId" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-      </form>
-    </div> -->
-    <!-- <h3 class="pt-3">Registers:</h3> -->
-    <!-- <pre id="registers" class="bg-light p-2"></pre> -->
   </div>
 
   <!-- 引入 Bootstrap 和依赖的 Popper.js 和 jQuery -->
@@ -71,22 +61,51 @@
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script> -->
   <script>
+
+    const allOnBtn = document.querySelector("#all-on-btn")
+    const allOffBtn = document.querySelector("#all-off-btn")
+    const startLoopBtn = document.querySelector("#start-loop-btn")
+    const stopLoopBtn = document.querySelector("#stop-loop-btn")
+
+    // allOnBtn.addEventListener('click', setAllOn)
+    // allOffBtn.addEventListener('click', setAllOff)
+    // startLoopBtn.addEventListener('click', setStartLoop)
+    // stopLoopBtn.addEventListener('click', setStopLoop)
+
+
     document.getElementById('modbusForm').addEventListener('submit', function (e) {
       e.preventDefault();
+      const deviceName = document.getElementById('deviceName').value;
       const serialPort = document.getElementById('serialPort').value;
-      const deviceId = document.getElementById('deviceId').value;
+      const modbusId = document.getElementById('modbusId').value;
 
       fetch('/configure-modbus', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ serialPort, deviceId }),
+        body: JSON.stringify({ serialPort, modbusId, deviceName }),
       })
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            document.getElementById('registers').textContent = JSON.stringify(data.data, null, 2);
+            const indexDomMap = {
+              0: 'config_modbusId',
+              1: 'config_baudRate',
+              2: 'config_workMode',
+              // 3: 'config_modbusId',
+              // 4: 'config_modbusId',
+              // 5: 'config_modbusId',
+              // 6: 'config_modbusId',
+              7: 'config_brightness',
+              8: 'config_effectiveBit',
+              9: 'config_outputCircuits',
+            }
+            for (const [key, value] of Object.entries(indexDomMap)) {
+              document.querySelector(`#${value}`).innerText = data.data.configData[key]
+            }
+
+            // document.getElementById('registers').textContent = JSON.stringify(data.data, null, 2);
           } else {
             alert('Failed to read registers: ' + data.message);
           }
@@ -95,6 +114,35 @@
           console.error('Error:', error);
         });
     });
+
+    document.querySelector("#query-btn").addEventListener('click', queryLedStatus)
+
+    function setHtml(arr) {
+      const lHtml = []
+      arr.forEach(x => {
+        lHtml.push(` <button class="btn btn-lg light-button" onclick="toggleLight()">${x.state ? '开启' : '关闭'}</button>`);
+      })
+      document.querySelector('#led-container').innerHTML = lHtml.join('')
+    }
+
+    function queryLedStatus() {
+      fetch('/query-device-light', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ deviceId: "eb7793a4-0dfa-4b2e-a6ec-94b7753dfc49" })
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            setHtml(data.data)
+          }
+        })
+    }
+
+
+
   </script>
 </body>
 

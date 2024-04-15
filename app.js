@@ -1,9 +1,9 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const ModbusRTU = require("modbus-serial");
-import { v4 as uuid } from "uuid";
-import { JsonDB, Config } from "node-json-db";
-import * as deviceConfig from "./config";
+const { v4: uuid } = require("uuid");
+const { JsonDB, Config } = require("node-json-db");
+const deviceConfig = require("./config");
 const client = new ModbusRTU();
 const db = new JsonDB(new Config("fizzDataBase", true, false, "/"));
 const app = express();
@@ -66,54 +66,54 @@ function parseRegisterValuesToLightStates(registers) {
 }
 
 // 提供一个API端点接收Modbus配置并返回寄存器值
-app.post("/configure-modbus", (req, res) => {
+app.post("/configure-modbus", async (req, res) => {
   const { serialPort, modbusId, deviceName } = req.body;
-
-  client
-    .connectRTUBuffered(serialPort, { baudRate: 9600 })
-    .then(() => {
-      console.log("Connected to Modbus device.");
+  console.log("client.isOpen", client.isOpen);
+  try {
+    if (!client.isOpen) {
+      await client.connectRTUBuffered(serialPort, { baudRate: 9600 });
       client.setID(modbusId);
-
-      // 读取前10个寄存器的值，索引为0-9
-      return client.readHoldingRegisters(0, 10);
-    })
-    .then(async (data) => {
-      const deviceId = uuid();
-      const deviceDetailId = uuid();
-      await db.push(
-        "/devices",
-        [{ id: deviceId, deviceName, serialPort, modbusId }],
-        false
-      );
-      await db.push(
-        "/devices_detail",
-        [{ id: deviceDetailId, deviceId, deviceName, configData: data.data }],
-        false
-      );
-      // data.data = [1, 96, 1, 255, 1, 2, 0, 255, 16, 20];
-      res.json({
-        success: true,
-        data: {
-          deviceId,
-          deviceDetailId,
-          deviceName,
-          serialPort,
-          modbusId,
-          configData: data.data,
-        },
-      });
-    })
-    .catch((error) => {
-      console.error(error);
-      res.json({ success: false, message: error.message });
+    }
+    console.log("Connected to Modbus device.");
+    // 读取前10个寄存器的值，索引为0-9
+    const data = await client.readHoldingRegisters(0, 10);
+    const deviceId = uuid();
+    const deviceDetailId = uuid();
+    await db.push(
+      "/devices",
+      [{ id: deviceId, deviceName, serialPort, modbusId }],
+      false
+    );
+    await db.push(
+      "/devices_detail",
+      [{ id: deviceDetailId, deviceId, deviceName, configData: data.data }],
+      false
+    );
+    // data.data = [1, 96, 1, 255, 1, 2, 0, 255, 16, 20];
+    res.json({
+      success: true,
+      data: {
+        deviceId,
+        deviceDetailId,
+        deviceName,
+        serialPort,
+        modbusId,
+        configData: data.data,
+      },
     });
+  } catch (error) {
+    console.error(error);
+    res.json({ success: false, message: error.message });
+  }
+  if (client.isOpen) {
+  }
 });
 
 // 查询一个设备上所有灯的状态，传入设备id；
 app.post("/query-device-light", async (req, res) => {
   const { deviceId } = req.body;
-  const item = await db.fromPath(`/devices_detail/${deviceId}`);
+  console.log(deviceId);
+  const item = await db.getData(`/devices_detail/0`);
   console.log(item);
   const registerNum = item.configData[deviceConfig.outputCircuitsIndex];
 
