@@ -79,16 +79,12 @@ app.post("/configure-modbus", async (req, res) => {
     const data = await client.readHoldingRegisters(0, 10);
     const deviceId = uuid();
     const deviceDetailId = uuid();
-    await db.push(
-      "/devices",
-      [{ id: deviceId, deviceName, serialPort, modbusId }],
-      false
-    );
-    await db.push(
-      "/devices_detail",
-      [{ id: deviceDetailId, deviceId, deviceName, configData: data.data }],
-      false
-    );
+    await db.push("/devices", [
+      { id: deviceId, deviceName, serialPort, modbusId },
+    ]);
+    await db.push("/devices_detail", [
+      { id: deviceDetailId, deviceId, deviceName, configData: data.data },
+    ]);
     // data.data = [1, 96, 1, 255, 1, 2, 0, 255, 16, 20];
     res.json({
       success: true,
