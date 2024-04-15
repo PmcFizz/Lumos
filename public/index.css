@@ -31,4 +31,10 @@ body,
 #led-container button {
   margin-right: 4px;
   margin-bottom: 4px;
+  min-width: 75px;
+}
+
+#led-container {
+  display: flex;
+  justify-content: center;
 }

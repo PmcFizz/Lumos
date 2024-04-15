@@ -133,7 +133,7 @@ app.post("/start-loop-light-sign-led", (req, res) => {
   interval = setInterval(() => activateNextLed(registerNum), 1000); // 每1000毫秒（1秒）激活下一个LED
   res.json({
     success: true,
-    data: { interval, msg: "开始循环，单灯1秒步进亮" },
+    data: { msg: "开始循环，单灯1秒步进亮" },
   });
 });
 
@@ -143,7 +143,7 @@ app.post("/stop-loop-light-sign-led", (req, res) => {
   if (interval) {
     clearInterval(interval);
   }
-  res.json({ success: true, data: { interval, msg: "清空亮灯循环" } });
+  res.json({ success: true, data: { msg: "清空亮灯循环" } });
 });
 
 // 点亮所有灯
@@ -227,7 +227,43 @@ app.post("/query-led-status", async (req, res) => {
       res.json({
         success: true,
         data: lightsStates,
-        msg: `query ${registerNum} start from ${ledRegisterStartAddress} `,
+        msg: `query ${registerNum} start from ${deviceConfig.ledRegisterStartAddress} `,
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+      res.json({ success: false, msg: error.message });
+    });
+});
+
+app.post("/set-led-brightness", async (req, res) => {
+  const { brightnessValue } = req.body;
+
+  client
+    .writeRegister(deviceConfig.brightnessIndex, brightnessValue)
+    .then((data) => {
+      res.json({
+        success: true,
+        data: { brightnessValue },
+        msg: `change led brightness to ${brightnessValue} `,
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+      res.json({ success: false, msg: error.message });
+    });
+});
+
+app.post("/set-led-color", async (req, res) => {
+  const { colorValue } = req.body;
+
+  client
+    .writeRegister(deviceConfig.brightnessIndex, colorValue)
+    .then((data) => {
+      res.json({
+        success: true,
+        data: { colorValue },
+        msg: `change led color to ${colorValue} `,
       });
     })
     .catch((error) => {

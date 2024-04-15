@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>古希腊掌管灯的神：阿比诺斯</title>
+  <title>LUMOS</title>
+  <link rel="icon" href="lumos.png" />
   <!-- 引入 Bootstrap CSS -->
   <link rel="stylesheet" href="./bootstrap.min.css">
   <link rel="stylesheet" href="./index.css">
@@ -13,7 +14,7 @@
 <body>
   <div class="container">
     <div class="row h-full">
-      <div class="col-3 h-full border-right">
+      <div class="col-3 h-full">
         <h4>Configure Device</h4>
         <form id="modbusForm">
           <div class="form-group mb-2">
@@ -30,11 +31,11 @@
           </div>
           <div class="form-group mb-2">
             <label for="period" class="col-form-label-sm mb-0">Period(s):</label>
-            <input type="number" class="form-control form-control-sm" type="number" value="1" id="period" required>
+            <input type="number" class="form-control form-control-sm" type="number" value="6" id="period" required>
           </div>
           <p class="mb-1">
             <button type="submit" class="btn btn-primary btn-sm mb-1">Connection</button>
-            <button type="button" id="query-btn" class="btn btn-sm btn-primary mb-1">Query LED Status </button>
+            <button type="button" id="query-btn" class="btn btn-sm btn-primary mb-1">Auto Query Status</button>
           </p>
           <p class="mb-1">
             <button type="button" id="all-on-btn" class="btn btn-sm btn-primary">All On</button>
@@ -44,10 +45,14 @@
             <button type="button" id="start-loop-btn" class="btn btn-sm btn-primary">Start Loop</button>
             <button type="button" id="stop-loop-btn" class="btn btn-sm btn-primary">Stop Loop</button>
           </p>
+          <p class="mb-1">
+            <button type="button" id="set-brightness-btn" class="btn btn-sm btn-primary">Set Brightness</button>
+            <button type="button" id="set-color-btn" class="btn btn-sm btn-primary">Set Color</button>
+          </p>
         </form>
 
       </div>
-      <div class="col-9 px-4 border-radius">
+      <div class="col-9 px-4 border-left">
 
         <h4>Base Info</h4>
         <div class="row pb-4 border-bottom">
@@ -59,30 +64,6 @@
           <div class="col-3">Output Circuits: <span id="config_outputCircuits">——</span></div>
         </div>
         <div class="row pt-2" id="led-container">
-          <button type="button" class="btn btn-outline-secondary btn-sm">01 OFF</button>
-          <button type="button" class="btn btn-outline-success btn-sm">02 ON</button>
-          <button type="button" class="btn btn-outline-secondary btn-sm">03 OFF</button>
-          <button type="button" class="btn btn-outline-success btn-sm">04 ON</button>
-          <button type="button" class="btn btn-outline-secondary btn-sm">OFF</button>
-          <button type="button" class="btn btn-outline-success btn-sm">ON</button>
-          <button type="button" class="btn btn-outline-secondary btn-sm">OFF</button>
-          <button type="button" class="btn btn-outline-success btn-sm">ON</button>
-          <button type="button" class="btn btn-outline-secondary btn-sm">OFF</button>
-          <button type="button" class="btn btn-outline-success btn-sm">ON</button>
-          <button type="button" class="btn btn-outline-secondary btn-sm">OFF</button>
-          <button type="button" class="btn btn-outline-success btn-sm">ON</button>
-          <button type="button" class="btn btn-outline-secondary btn-sm">OFF</button>
-          <button type="button" class="btn btn-outline-success btn-sm">ON</button>
-          <button type="button" class="btn btn-outline-secondary btn-sm">OFF</button>
-          <button type="button" class="btn btn-outline-success btn-sm">ON</button>
-          <button type="button" class="btn btn-outline-secondary btn-sm">OFF</button>
-          <button type="button" class="btn btn-outline-success btn-sm">ON</button>
-          <button type="button" class="btn btn-outline-secondary btn-sm">OFF</button>
-          <button type="button" class="btn btn-outline-success btn-sm">ON</button>
-          <button type="button" class="btn btn-outline-secondary btn-sm">OFF</button>
-          <button type="button" class="btn btn-outline-success btn-sm">ON</button>
-          <button type="button" class="btn btn-outline-secondary btn-sm">OFF</button>
-          <button type="button" class="btn btn-outline-success btn-sm">ON</button>
         </div>
 
       </div>
@@ -92,17 +73,24 @@
 
   <script>
     let interval = null
+    let brightnessValue = 10
+    let isAutoQueryStatus = true
     const allOnBtn = document.querySelector("#all-on-btn")
     const allOffBtn = document.querySelector("#all-off-btn")
     const startLoopBtn = document.querySelector("#start-loop-btn")
     const stopLoopBtn = document.querySelector("#stop-loop-btn")
     const queryBtn = document.querySelector("#query-btn")
+    const setBrightnessBtn = document.querySelector("#set-brightness-btn")
+    const setColorBtn = document.querySelector("#set-color-btn")
+
 
     allOnBtn.addEventListener('click', setAllOn)
     allOffBtn.addEventListener('click', setAllOff)
     startLoopBtn.addEventListener('click', startLoop)
     stopLoopBtn.addEventListener('click', stopLoop)
     queryBtn.addEventListener('click', queryLedStatus)
+    setBrightnessBtn.addEventListener('click', setBrightness)
+    setColorBtn.addEventListener('click', setColor)
 
     document.getElementById('modbusForm').addEventListener('submit', async function (e) {
       if (interval) {
@@ -128,13 +116,16 @@
           8: 'config_effectiveBit',
           9: 'config_outputCircuits',
         }
+        data.data.configData[1] = data.data.configData[1] * 100
         for (const [key, value] of Object.entries(indexDomMap)) {
           document.querySelector(`#${value}`).innerText = data.data.configData[key]
         }
 
-        interval = setInterval(() => {
-          queryLedStatus()
-        }, period)
+        if (isAutoQueryStatus) {
+          interval = setInterval(() => {
+            queryLedStatus()
+          }, period * 1000)
+        }
 
       } else {
         alert('Failed to read registers: ' + data.message);
@@ -151,6 +142,7 @@
         });
         const result = await response.json();
         if (result.success) {
+          console.log(result, 'result')
           return result;
         } else {
           alert('Failed to read registers: ' + result.message);
@@ -166,6 +158,7 @@
         const data = await sendData('/all-on-led', {}); // Assuming empty object if no data is needed
         if (data && data.success) {
           console.log('操作成功');
+          queryLedStatus()
         }
       } catch (error) {
         console.error('Error in setAllOn:', error);
@@ -177,6 +170,7 @@
         const data = await sendData('/all-off-led', {}); // Assuming empty object if no data is needed
         if (data && data.success) {
           console.log('操作成功');
+          queryLedStatus()
         }
       } catch (error) {
         console.error('Error in setAllOn:', error);
@@ -224,12 +218,26 @@
         const data = await sendData('/set-light', { lightNumber, state });
         if (data && data.success) {
           console.log('操作成功');
+          queryLedStatus()
         }
       } catch (error) {
         console.error('Error in setAllOn:', error);
       }
     }
 
+    async function changeQueryWay() {
+      if (isAutoQueryStatus) {
+        if (interval) {
+          clearInterval(interval)
+          queryBtn.innerText = 'Manual Query Led Status'
+        }
+      } else {
+        interval = setInterval(() => {
+          queryLedStatus()
+        }, period * 1000)
+        queryBtn.innerText = 'Auto Query Led Status'
+      }
+    }
     async function queryLedStatus() {
       const data = await sendData('/query-led-status', { deviceId: "eb7793a4-0dfa-4b2e-a6ec-94b7753dfc49" })
       if (data.success) {
@@ -237,6 +245,32 @@
       }
     }
 
+    async function setBrightness() {
+      try {
+        const data = await sendData('/set-led-brightness', { brightnessValue }); // Assuming empty object if no data is needed
+        if (data && data.success) {
+          console.log('操作成功');
+          if (brightnessValue == 10) {
+            brightnessValue = 255
+          } else {
+            brightnessValue = 10
+          }
+        }
+      } catch (error) {
+        console.error('Error in setAllOn:', error);
+      }
+    }
+
+    async function setColor() {
+      try {
+        const data = await sendData('/set-led-color', { colorValue: '' }); // Assuming empty object if no data is needed
+        if (data && data.success) {
+          console.log('操作成功');
+        }
+      } catch (error) {
+        console.error('Error in setAllOn:', error);
+      }
+    }
   </script>
 </body>
 
