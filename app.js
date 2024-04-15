@@ -112,9 +112,7 @@ app.post("/configure-modbus", async (req, res) => {
 // 查询一个设备上所有灯的状态，传入设备id；
 app.post("/query-device-light", async (req, res) => {
   const { deviceId } = req.body;
-  console.log(deviceId);
   const item = await db.getData(`/devices_detail/0`);
-  console.log(item);
   const registerNum = item.configData[deviceConfig.outputCircuitsIndex];
 
   client
@@ -153,8 +151,10 @@ app.post("/stop-loop-light-sign-led", (req, res) => {
 });
 
 // 点亮所有灯
-app.post("/light-all-led", (req, res) => {
-  const { registerNum = 2 } = req.body;
+app.post("/all-on-led", async (req, res) => {
+  const item = await db.getData(`/devices_detail/0`);
+  const registerNum = item.configData[deviceConfig.outputCircuitsIndex];
+
   let registers = new Array(registerNum).fill(0xffff);
   // 将寄存器值写入Modbus设备
   client
@@ -169,8 +169,10 @@ app.post("/light-all-led", (req, res) => {
 });
 
 // 熄灭所有灯
-app.post("/extinguish-all-led", (req, res) => {
-  const { registerNum = 2 } = req.body;
+app.post("/all-off-led", async (req, res) => {
+  const item = await db.getData(`/devices_detail/0`);
+  const registerNum = item.configData[deviceConfig.outputCircuitsIndex];
+
   let registers = new Array(registerNum).fill(0x0000);
   // 将寄存器值写入Modbus设备
   client
@@ -216,9 +218,11 @@ app.post("/set-light", (req, res) => {
     });
 });
 
-// 查询灯的状态，传入寄存器数；
-app.post("/query-light", (req, res) => {
-  const { registerNum = 2 } = req.body; // 从请求体中获取灯的编号和状态
+// 查询灯的状态，传入设备ID；
+app.post("/query-led-status", async (req, res) => {
+  // const { registerNum = 2 } = req.body; // 从请求体中获取灯的编号和状态
+  const item = await db.getData(`/devices_detail/0`);
+  const registerNum = item.configData[deviceConfig.outputCircuitsIndex];
 
   client
     .readHoldingRegisters(deviceConfig.ledRegisterStartAddress, registerNum)

@@ -13,3 +13,17 @@
 .border-radius {
   border-radius: 4px;
 }
+
+.mb-4 {
+  margin-bottom: 4px;
+}
+
+html,
+body,
+.container {
+  min-height: 100vh;
+}
+
+.h-full {
+  height: 100%;
+}
