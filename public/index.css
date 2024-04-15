@@ -27,3 +27,8 @@ body,
 .h-full {
   height: 100%;
 }
+
+#led-container button {
+  margin-right: 4px;
+  margin-bottom: 4px;
+}

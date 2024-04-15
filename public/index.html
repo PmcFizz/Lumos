@@ -14,7 +14,7 @@
   <div class="container">
     <div class="row h-full">
       <div class="col-3 h-full border-right">
-        <h4>Configure Connection</h4>
+        <h4>Configure Device</h4>
         <form id="modbusForm">
           <div class="form-group mb-2">
             <label for="deviceName" class="col-form-label-sm mb-0">Device Name:</label>
@@ -58,7 +58,32 @@
           <div class="col-3">Effective Bit: <span id="config_effectiveBit">——</span></div>
           <div class="col-3">Output Circuits: <span id="config_outputCircuits">——</span></div>
         </div>
-        <div class="row" id="led-container"></div>
+        <div class="row pt-2" id="led-container">
+          <button type="button" class="btn btn-outline-secondary btn-sm">01 OFF</button>
+          <button type="button" class="btn btn-outline-success btn-sm">02 ON</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm">03 OFF</button>
+          <button type="button" class="btn btn-outline-success btn-sm">04 ON</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm">OFF</button>
+          <button type="button" class="btn btn-outline-success btn-sm">ON</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm">OFF</button>
+          <button type="button" class="btn btn-outline-success btn-sm">ON</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm">OFF</button>
+          <button type="button" class="btn btn-outline-success btn-sm">ON</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm">OFF</button>
+          <button type="button" class="btn btn-outline-success btn-sm">ON</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm">OFF</button>
+          <button type="button" class="btn btn-outline-success btn-sm">ON</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm">OFF</button>
+          <button type="button" class="btn btn-outline-success btn-sm">ON</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm">OFF</button>
+          <button type="button" class="btn btn-outline-success btn-sm">ON</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm">OFF</button>
+          <button type="button" class="btn btn-outline-success btn-sm">ON</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm">OFF</button>
+          <button type="button" class="btn btn-outline-success btn-sm">ON</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm">OFF</button>
+          <button type="button" class="btn btn-outline-success btn-sm">ON</button>
+        </div>
 
       </div>
     </div>
@@ -183,12 +208,27 @@
 
     function setHtml(arr) {
       const lHtml = []
-      arr.forEach(x => {
-        lHtml.push(` <button class="btn btn-lg light-button" onclick="toggleLight()">${x.state ? '开启' : '关闭'}</button>`);
+      arr.forEach((x, i) => {
+        const { state } = x
+        const styleClass = `btn ${state ? 'btn-outline-success' : 'btn-outline-secondary'}  btn-sm`
+        const ledNo = i + 1
+        lHtml.push(`
+          <button type="button" class="${styleClass}"" onclick="toggleStatus(${ledNo}, ${!state})" >${ledNo} ${state ? 'ON' : 'OFF'}</button>
+        `);
       })
       document.querySelector('#led-container').innerHTML = lHtml.join('')
     }
 
+    async function toggleStatus(lightNumber, state) {
+      try {
+        const data = await sendData('/set-light', { lightNumber, state });
+        if (data && data.success) {
+          console.log('操作成功');
+        }
+      } catch (error) {
+        console.error('Error in setAllOn:', error);
+      }
+    }
     async function queryLedStatus() {
       const data = await sendData('/query-led-status', { deviceId: "eb7793a4-0dfa-4b2e-a6ec-94b7753dfc49" })
       if (data.success) {
