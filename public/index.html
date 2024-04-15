@@ -47,7 +47,7 @@
         </form>
 
       </div>
-      <div class="col-9 p-4 border-radius">
+      <div class="col-9 px-4 border-radius">
 
         <h4>Base Info</h4>
         <div class="row pb-4 border-bottom">
@@ -229,6 +229,7 @@
         console.error('Error in setAllOn:', error);
       }
     }
+
     async function queryLedStatus() {
       const data = await sendData('/query-led-status', { deviceId: "eb7793a4-0dfa-4b2e-a6ec-94b7753dfc49" })
       if (data.success) {
