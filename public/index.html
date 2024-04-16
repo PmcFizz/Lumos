@@ -238,6 +238,7 @@
         queryBtn.innerText = 'Auto Query Led Status'
       }
     }
+
     async function queryLedStatus() {
       const data = await sendData('/query-led-status', { deviceId: "eb7793a4-0dfa-4b2e-a6ec-94b7753dfc49" })
       if (data.success) {
@@ -271,6 +272,30 @@
         console.error('Error in setAllOn:', error);
       }
     }
+
+    function testMode() {
+      const array = Array(100).fill(0).map(() => ({
+        state: Math.random() < 0.5
+      }));
+      setHtml(array)
+
+      const configData = [1, 96, 1, 255, 1, 2, 0, 255, 16, 20]
+      const indexDomMap = {
+        0: 'config_modbusId',
+        1: 'config_baudRate',
+        2: 'config_workMode',
+        7: 'config_brightness',
+        8: 'config_effectiveBit',
+        9: 'config_outputCircuits',
+      }
+      configData[1] = configData[1] * 100
+      for (const [key, value] of Object.entries(indexDomMap)) {
+        document.querySelector(`#${value}`).innerText = configData[key]
+      }
+
+    }
+
+    testMode()
   </script>
 </body>
 
