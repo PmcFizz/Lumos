@@ -64,6 +64,13 @@
           <div class="col-3">Output Circuits: <span id="config_outputCircuits">——</span></div>
         </div>
         <div class="row pt-2" id="led-container">
+          <button type="button" class="btn btn-sm rgb-btn" style="background-color: red;">01 </button>
+          <button type="button" class="btn btn-sm rgb-btn" style="background-color: red;">01 </button>
+          <button type="button" class="btn btn-sm rgb-btn" style="background-color: red;">01 </button>
+          <button type="button" class="btn btn-sm rgb-btn" style="background-color: red;">01 </button>
+          <button type="button" class="btn btn-sm rgb-btn" style="background-color: red;">01 </button>
+
+
         </div>
 
       </div>
@@ -71,6 +78,7 @@
 
   </div>
 
+  <script src="./util.js"></script>
   <script>
     let interval = null
     let brightnessValue = 10
@@ -213,6 +221,17 @@
       document.querySelector('#led-container').innerHTML = lHtml.join('')
     }
 
+    function setRGBHtml(arr) {
+      const lHtml = []
+      arr.forEach((x, i) => {
+        const ledNo = i + 1
+        lHtml.push(`
+          <button type="button" class="btn btn-sm rgb-btn"  onclick="toggleColor(${ledNo}, '${x}')" style="background-color: #${x};">${ledNo}</button>
+        `);
+      })
+      document.querySelector('#led-container').innerHTML = lHtml.join('')
+    }
+
     async function toggleStatus(lightNumber, state) {
       try {
         const data = await sendData('/set-light', { lightNumber, state });
@@ -223,6 +242,10 @@
       } catch (error) {
         console.error('Error in setAllOn:', error);
       }
+    }
+
+    async function toggleColor(rgbNum, color) {
+      console.log(rgbNum, color)
     }
 
     async function changeQueryWay() {
@@ -273,11 +296,29 @@
       }
     }
 
+
+    function generateRandomHexColors(num) {
+      return Array(num).fill().map(() => {
+        // 生成随机的红、绿、蓝值
+        let red = Math.floor(Math.random() * 256);
+        let green = Math.floor(Math.random() * 256);
+        let blue = Math.floor(Math.random() * 256);
+
+        // 转换为16进制颜色值
+        let hexColor = (
+          ((red << 16) | (green << 8) | blue).toString(16).padStart(6, '0')
+        ).toUpperCase();
+        return hexColor;
+      });
+    }
+
     function testMode() {
-      const array = Array(100).fill(0).map(() => ({
-        state: Math.random() < 0.5
-      }));
-      setHtml(array)
+      // const array = Array(100).fill(0).map(() => ({
+      //   state: Math.random() < 0.5
+      // }));
+      // setHtml(array)
+      let hexColors = generateRandomHexColors(100);
+      setRGBHtml(hexColors)
 
       const configData = [1, 96, 1, 255, 1, 2, 0, 255, 16, 20]
       const indexDomMap = {
