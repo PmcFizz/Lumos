@@ -12,6 +12,7 @@ let interval = null;
 let currentLed = 0;
 app.use(bodyParser.json()); // 支持 JSON 编码的请求体
 app.use(express.static("public")); // 设置静态文件目录
+let registerNum = 20;
 
 // 点亮下一个LED的函数
 function activateNextLed(n) {
@@ -77,14 +78,18 @@ app.post("/configure-modbus", async (req, res) => {
     console.log("Connected to Modbus device.");
     // 读取前10个寄存器的值，索引为0-9
     const data = await client.readHoldingRegisters(0, 10);
+    console.log(1);
     const deviceId = uuid();
     const deviceDetailId = uuid();
-    await db.push("/devices", [
-      { id: deviceId, deviceName, serialPort, modbusId },
-    ]);
-    await db.push("/devices_detail", [
-      { id: deviceDetailId, deviceId, deviceName, configData: data.data },
-    ]);
+    registerNum = data.data[deviceConfig.outputCircuitsIndex];
+    // await db.push("/devices", [
+    //   { id: deviceId, deviceName, serialPort, modbusId },
+    // ]);
+    // console.log(2);
+    // await db.push("/devices_detail", [
+    //   { id: deviceDetailId, deviceId, deviceName, configData: data.data },
+    // ]);
+    console.log(3);
     // data.data = [1, 96, 1, 255, 1, 2, 0, 255, 16, 20];
     res.json({
       success: true,
@@ -101,8 +106,6 @@ app.post("/configure-modbus", async (req, res) => {
     console.error(error);
     res.json({ success: false, message: error.message });
   }
-  if (client.isOpen) {
-  }
 });
 
 // 查询一个设备上所有灯的状态，传入设备id；
@@ -114,10 +117,10 @@ app.post("/query-device-light", async (req, res) => {
   client
     .readHoldingRegisters(deviceConfig.ledRegisterStartAddress, registerNum)
     .then((data) => {
-      let lightsStates = parseRegisterValuesToLightStates(data.data);
+      // let lightsStates = parseRegisterValuesToLightStates(data.data);
       res.json({
         success: true,
-        data: lightsStates,
+        data: data.data,
         msg: `query ${registerNum} start from ${deviceConfig.ledRegisterStartAddress} `,
       });
     })
@@ -130,7 +133,7 @@ app.post("/query-device-light", async (req, res) => {
 // 开始循环亮灯
 app.post("/start-loop-light-sign-led", (req, res) => {
   const { registerNum = 2 } = req.body;
-  interval = setInterval(() => activateNextLed(registerNum), 1000); // 每1000毫秒（1秒）激活下一个LED
+  // interval = setInterval(() => activateNextLed(registerNum), 1000); // 每1000毫秒（1秒）激活下一个LED
   res.json({
     success: true,
     data: { msg: "开始循环，单灯1秒步进亮" },
@@ -217,16 +220,16 @@ app.post("/set-light", (req, res) => {
 // 查询灯的状态，传入设备ID；
 app.post("/query-led-status", async (req, res) => {
   // const { registerNum = 2 } = req.body; // 从请求体中获取灯的编号和状态
-  const item = await db.getData(`/devices_detail/0`);
-  const registerNum = item.configData[deviceConfig.outputCircuitsIndex];
+  // const item = await db.getData(`/devices_detail/0`);
+  // const registerNum = item.configData[deviceConfig.outputCircuitsIndex];
 
   client
     .readHoldingRegisters(deviceConfig.ledRegisterStartAddress, registerNum)
     .then((data) => {
-      let lightsStates = parseRegisterValuesToLightStates(data.data);
+      // let lightsStates = parseRegisterValuesToLightStates(data.data);
       res.json({
         success: true,
-        data: lightsStates,
+        data: data.data,
         msg: `query ${registerNum} start from ${deviceConfig.ledRegisterStartAddress} `,
       });
     })
@@ -264,6 +267,47 @@ app.post("/set-led-color", async (req, res) => {
         success: true,
         data: { colorValue },
         msg: `change led color to ${colorValue} `,
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+      res.json({ success: false, msg: error.message });
+    });
+});
+
+/**
+ * 写入单个寄存器值
+ */
+app.post("/writeRegister", async (req, res) => {
+  const { dataAddress, value } = req.body;
+
+  client
+    .writeRegister(dataAddress, value)
+    .then((data) => {
+      res.json({
+        success: true,
+        data: { dataAddress, value },
+        msg: `change index ${dataAddress}  to ${value} `,
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+      res.json({ success: false, msg: error.message });
+    });
+});
+
+/**
+ * 写入多个寄存器值
+ */
+app.post("/writeRegisters", async (req, res) => {
+  const { dataAddress, values } = req.body;
+  client
+    .writeRegisters(dataAddress, values)
+    .then((data) => {
+      res.json({
+        success: true,
+        data: { dataAddress, values },
+        msg: `change ${dataAddress} to ${values} `,
       });
     })
     .catch((error) => {
