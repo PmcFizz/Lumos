@@ -64,14 +64,16 @@
           <div class="col-3">Output Circuits: <span id="config_outputCircuits">——</span></div>
         </div>
         <div class="row pt-2" id="led-container">
+          <!-- <button type="button" class="btn btn-sm rgb-btn" style="background-color: red;">01 </button>
           <button type="button" class="btn btn-sm rgb-btn" style="background-color: red;">01 </button>
           <button type="button" class="btn btn-sm rgb-btn" style="background-color: red;">01 </button>
           <button type="button" class="btn btn-sm rgb-btn" style="background-color: red;">01 </button>
-          <button type="button" class="btn btn-sm rgb-btn" style="background-color: red;">01 </button>
-          <button type="button" class="btn btn-sm rgb-btn" style="background-color: red;">01 </button>
-
+          <button type="button" class="btn btn-sm rgb-btn" style="background-color: red;">01 </button> -->
+        </div>
+        <div class="row pt-2" id="rgb-led-container">
 
         </div>
+
       </div>
     </div>
 
@@ -244,7 +246,7 @@
           <button type="button" class="btn btn-sm rgb-btn" data-ledno="${ledNo}" style="background-color: #${x};">${ledNo}</button>
         `);
       })
-      document.querySelector('#led-container').innerHTML = lHtml.join('')
+      document.querySelector('#rgb-led-container').innerHTML = lHtml.join('')
 
       initRGBBtnClick()
     }

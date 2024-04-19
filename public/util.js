@@ -36,7 +36,7 @@ function parseRegisterValuesToLightStates(registers) {
 function parseRGBRegisterToHex(registers) {
   let rgbArr = [];
   registers.forEach((hexValue) => {
-    // 将16进制值转换为二进制字符串
+    // 将10进制值转换为二进制字符串
     let binaryString = hexValue
       .toString(2)
       .padStart(15, "0")
@@ -92,6 +92,7 @@ const colors = [
   "FFFFFF",
 ];
 
+// rbg => bgr
 const colorMap = {
   "000000": "000",
   "0000FF": "001",
@@ -102,22 +103,26 @@ const colorMap = {
   FFFF00: "110",
   FFFFFF: "111",
 };
-// ["000", "001", "010", "011", "100", "101", "110", "111"];
 
 /**
  * 根据颜色索引和一个新的颜色，获取寄存器的值
  * @param {*} registers 所有寄存器的值
- * @param {*} globalColorIndex 全局的颜色索引，0起
- * @param {*} newColorIndex 新颜色的索引
+ * @param {*} globalColorIndex 全局的颜色索引，1起
+ * @param {*} hexColor 新颜色 16进制
  * @returns
  */
-function updateRegisterValues(registers, globalColorIndex, newColor) {
-  // 二进制表示的8种可能的RGB颜色
-  const colorMap = ["000", "001", "010", "011", "100", "101", "110", "111"];
+function updateRegisterValues(registers, globalColorIndex, hexColor) {
+  // 将16进制RGB颜色转换为二进制字符串，然后只取RGB相应的位
+  const red = parseInt(hexColor.substring(0, 2), 16) > 0 ? "1" : "0";
+  const green = parseInt(hexColor.substring(2, 4), 16) > 0 ? "1" : "0";
+  const blue = parseInt(hexColor.substring(4, 6), 16) > 0 ? "1" : "0";
 
-  // 计算在哪个寄存器及该寄存器内的索引位置
-  let registerIndex = Math.floor(globalColorIndex / 5);
-  let colorIndexInRegister = globalColorIndex % 5;
+  // 需要从高到低拼接
+  const newColorBinary = green + red + blue;
+
+  // 计算在哪个寄存器及该寄存器内的索引位置，索引从1开始计数
+  let registerIndex = Math.floor((globalColorIndex - 1) / 5);
+  let colorIndexInRegister = (globalColorIndex - 1) % 5;
 
   // 检查是否超出了寄存器的范围
   if (registerIndex >= registers.length) {
@@ -127,16 +132,11 @@ function updateRegisterValues(registers, globalColorIndex, newColor) {
   // 获取要修改的寄存器的当前值
   let currentHexValue = registers[registerIndex];
 
-  // 将当前16进制寄存器值转换为二进制字符串
-  let binaryString = parseInt(currentHexValue, 16)
-    .toString(2)
-    .padStart(15, "0");
+  // 将当前10进制寄存器值转换为二进制字符串，注意16位，最高位是不使用的
+  let binaryString = currentHexValue.toString(2).padStart(16, "0"); // 保证长度为16位
 
-  // 获取新颜色的二进制表示
-  let newColorBinary = colorMap[newColorIndex];
-
-  // 计算需要修改的颜色在二进制字符串中的起始位置
-  let startIndex = colorIndexInRegister * 3;
+  // 计算需要修改的颜色在二进制字符串中的起始位置，反向计算，从低位开始
+  let startIndex = 16 - (colorIndexInRegister * 3 + 3);
 
   // 更新二进制字符串的对应部分
   binaryString =
@@ -144,21 +144,11 @@ function updateRegisterValues(registers, globalColorIndex, newColor) {
     newColorBinary +
     binaryString.substring(startIndex + 3);
 
-  // 将更新后的二进制字符串转回16进制
-  let newHexValue = parseInt(binaryString, 2)
-    .toString(16)
-    .toUpperCase()
-    .padStart(4, "0");
+  // 将更新后的二进制字符串转回10进制
+  let newHexValue = parseInt(binaryString, 2).toString(10);
 
   // 更新寄存器数组
   registers[registerIndex] = newHexValue;
 
   return registers;
 }
-
-// 示例使用
-// let registers = ['1AC', '2B3']; // 假设这是从设备读取的寄存器值
-// let globalColorIndex = 6;       // 要修改的全局颜色索引
-// let newColorIndex = 3;          // 新颜色索引（对应颜色'011'）
-// let updatedRegisters = updateRegisterValues(registers, globalColorIndex, newColorIndex);
-// console.log(updatedRegisters);

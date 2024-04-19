@@ -39,7 +39,7 @@ body,
   justify-content: center;
 }
 
-#led-container button.rgb-btn {
+#rgb-led-container button.rgb-btn {
   margin-right: 4px;
   margin-bottom: 4px;
   border-radius: 50%;
@@ -72,15 +72,6 @@ body,
   margin: 4px;
   padding: 8px;
 }
-
-/* "000000",
-"0000FF",
-"00FF00",
-"00FFFF",
-"FF0000",
-"FF00FF",
-"FFFF00",
-"FFFFFF", */
 
 .color-btn:nth-child(1) {
   background-color: #000000;

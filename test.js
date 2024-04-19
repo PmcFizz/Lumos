@@ -32,31 +32,41 @@
 
 // setInterval(activateNextLed, 1000)
 
-function parseRGBRegisterToHex(hexValue) {
-  // 将16进制值转换为二进制字符串
-  let binaryString = parseInt(hexValue, 16).toString(2).padStart(15, "0");
+// function parseRGBRegisterToHex(hexValue) {
+//   // 将16进制值转换为二进制字符串
+//   let binaryString = parseInt(hexValue, 16).toString(2).padStart(15, "0");
 
-  // 初始化存储结果的数组
-  let hexColors = [];
+//   // 初始化存储结果的数组
+//   let hexColors = [];
 
-  // 每3位解析一个RGB像素，转换为16进制颜色值
-  for (let i = 0; i < binaryString.length; i += 3) {
-    let red = parseInt(binaryString.charAt(i)) * 255; // R
-    let green = parseInt(binaryString.charAt(i + 1)) * 255; // G
-    let blue = parseInt(binaryString.charAt(i + 2)) * 255; // B
+//   // 每3位解析一个RGB像素，转换为16进制颜色值
+//   for (let i = 0; i < binaryString.length; i += 3) {
+//     let red = parseInt(binaryString.charAt(i)) * 255; // R
+//     let green = parseInt(binaryString.charAt(i + 1)) * 255; // G
+//     let blue = parseInt(binaryString.charAt(i + 2)) * 255; // B
 
-    // 将RGB值转换为16进制字符串
-    let hexColor = ((red << 16) | (green << 8) | blue)
-      .toString(16)
-      .padStart(6, "0")
-      .toUpperCase();
-    hexColors.push(hexColor);
-  }
+//     // 将RGB值转换为16进制字符串
+//     let hexColor = ((red << 16) | (green << 8) | blue)
+//       .toString(16)
+//       .padStart(6, "0")
+//       .toUpperCase();
+//     hexColors.push(hexColor);
+//   }
 
-  return hexColors;
-}
+//   return hexColors;
+// }
 
-// 示例
-let hexValue = "1AC"; // 假设寄存器值
-let hexColors = parseRGBRegisterToHex(hexValue);
-console.log(hexColors);
+// // 示例
+// let hexValue = "1AC"; // 假设寄存器值
+// let hexColors = parseRGBRegisterToHex(hexValue);
+// console.log(hexColors);
+
+let binaryString = "0000000100010001".split("").reverse().join("");
+const newColorBinary = "001";
+startIndex = 0;
+binaryString =
+  binaryString.substring(0, startIndex) +
+  newColorBinary +
+  binaryString.substring(startIndex + 3);
+
+console.log(binaryString.split("").reverse().join(""));
