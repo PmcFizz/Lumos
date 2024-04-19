@@ -2,10 +2,10 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const ModbusRTU = require("modbus-serial");
 const { v4: uuid } = require("uuid");
-const { JsonDB, Config } = require("node-json-db");
+// const { JsonDB, Config } = require("node-json-db");
 const deviceConfig = require("./config");
 const client = new ModbusRTU();
-const db = new JsonDB(new Config("fizzDataBase", true, false, "/"));
+// const db = new JsonDB(new Config("fizzDataBase", true, false, "/"));
 const app = express();
 const port = 666;
 let interval = null;
@@ -111,8 +111,8 @@ app.post("/configure-modbus", async (req, res) => {
 // 查询一个设备上所有灯的状态，传入设备id；
 app.post("/query-device-light", async (req, res) => {
   const { deviceId } = req.body;
-  const item = await db.getData(`/devices_detail/0`);
-  const registerNum = item.configData[deviceConfig.outputCircuitsIndex];
+  // const item = await db.getData(`/devices_detail/0`);
+  // const registerNum = item.configData[deviceConfig.outputCircuitsIndex];
 
   client
     .readHoldingRegisters(deviceConfig.ledRegisterStartAddress, registerNum)
@@ -151,8 +151,8 @@ app.post("/stop-loop-light-sign-led", (req, res) => {
 
 // 点亮所有灯
 app.post("/all-on-led", async (req, res) => {
-  const item = await db.getData(`/devices_detail/0`);
-  const registerNum = item.configData[deviceConfig.outputCircuitsIndex];
+  // const item = await db.getData(`/devices_detail/0`);
+  // const registerNum = item.configData[deviceConfig.outputCircuitsIndex];
 
   let registers = new Array(registerNum).fill(0xffff);
   // 将寄存器值写入Modbus设备
@@ -169,8 +169,8 @@ app.post("/all-on-led", async (req, res) => {
 
 // 熄灭所有灯
 app.post("/all-off-led", async (req, res) => {
-  const item = await db.getData(`/devices_detail/0`);
-  const registerNum = item.configData[deviceConfig.outputCircuitsIndex];
+  // const item = await db.getData(`/devices_detail/0`);
+  // const registerNum = item.configData[deviceConfig.outputCircuitsIndex];
 
   let registers = new Array(registerNum).fill(0x0000);
   // 将寄存器值写入Modbus设备

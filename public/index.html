@@ -72,8 +72,18 @@
 
 
         </div>
-
       </div>
+    </div>
+
+    <div id="floatingDiv" class="change-color-container" style="display: none;">
+      <span class="color-btn" onclick="changeColor('000000')"></span>
+      <span class="color-btn" onclick="changeColor('0000FF')"></span>
+      <span class="color-btn" onclick="changeColor('00FF00')"></span>
+      <span class="color-btn" onclick="changeColor('00FFFF')"></span>
+      <span class="color-btn" onclick="changeColor('FF0000')"></span>
+      <span class="color-btn" onclick="changeColor('FF00FF')"></span>
+      <span class="color-btn" onclick="changeColor('FFFF00')"></span>
+      <span class="color-btn" onclick="changeColor('FFFFFF')"></span>
     </div>
 
   </div>
@@ -83,6 +93,8 @@
     let interval = null
     let brightnessValue = 10
     let isAutoQueryStatus = true
+    let registersValues = null
+    let clickRBGNum = null
     const allOnBtn = document.querySelector("#all-on-btn")
     const allOffBtn = document.querySelector("#all-off-btn")
     const startLoopBtn = document.querySelector("#start-loop-btn")
@@ -90,6 +102,7 @@
     const queryBtn = document.querySelector("#query-btn")
     const setBrightnessBtn = document.querySelector("#set-brightness-btn")
     const setColorBtn = document.querySelector("#set-color-btn")
+    const floatingDiv = document.getElementById('floatingDiv');
 
 
     allOnBtn.addEventListener('click', setAllOn)
@@ -228,10 +241,12 @@
       arr.forEach((x, i) => {
         const ledNo = i + 1
         lHtml.push(`
-          <button type="button" class="btn btn-sm rgb-btn"  onclick="toggleColor(${ledNo}, '${x}')" style="background-color: #${x};">${ledNo}</button>
+          <button type="button" class="btn btn-sm rgb-btn" data-ledno="${ledNo}" style="background-color: #${x};">${ledNo}</button>
         `);
       })
       document.querySelector('#led-container').innerHTML = lHtml.join('')
+
+      initRGBBtnClick()
     }
 
     async function toggleStatus(lightNumber, state) {
@@ -246,8 +261,13 @@
       }
     }
 
-    async function toggleColor(rgbNum, color) {
-      console.log(rgbNum, color)
+    async function clickRGBtn(rgbNum, event) {
+      console.log(event)
+      clickRBGNum = rgbNum
+      // 设置悬浮 div 的位置在按钮上方约 10 像素
+      floatingDiv.style.left = event.pageX + 'px'; // 点击位置的横坐标
+      floatingDiv.style.top = (event.pageY - floatingDiv.offsetHeight - 10) + 'px'; // 点击位置的纵坐标，向上偏移 div 的高度加额外的 10px
+      floatingDiv.style.display = 'block'; // 显示悬浮 div
     }
 
     async function changeQueryWay() {
@@ -267,6 +287,7 @@
     async function queryLedStatus() {
       const data = await sendData('/query-led-status', { deviceId: "eb7793a4-0dfa-4b2e-a6ec-94b7753dfc49" })
       if (data.success) {
+        registersValues = data.data
         // setHtml(data.data)
         setRGBHtml(data.data)
       }
@@ -338,7 +359,47 @@
 
     }
 
-    // testMode()
+    testMode()
+
+    function initRGBBtnClick() {
+      console.log(121)
+      document.querySelectorAll('.rgb-btn').forEach(button => {
+        button.addEventListener('click', function (event) {
+          const ledNo = event.target.dataset.ledno
+          clickRBGNum = ledNo
+          var floatingDiv = document.getElementById('floatingDiv');
+          // 设置悬浮 div 的位置在按钮上方约 10 像素
+          floatingDiv.style.left = event.pageX + 'px'; // 点击位置的横坐标
+          floatingDiv.style.top = (event.pageY - floatingDiv.offsetHeight - 10) + 'px'; // 点击位置的纵坐标，向上偏移 div 的高度加额外的 10px
+          floatingDiv.style.display = 'block'; // 显示悬浮 div
+        });
+      });
+    }
+
+    document.getElementById('floatingDiv').addEventListener('click', function () {
+      this.style.display = 'none';
+    });
+
+    // document.addEventListener('click', function (event) {
+    //   if (!floatingDiv.contains(event.target) && event.target !== floatingDiv) {
+    //     floatingDiv.style.display = 'none';
+    //   }
+    // });
+
+    async function changeColor(color) {
+      console.log(clickRBGNum, color)
+      const newRegistersValues = updateRegisterValues(registersValues, clickRBGNum, color)
+      try {
+        const data = await sendData('/writeRegisters', { dataAddress: 10, values: newRegistersValues }); // Assuming empty object if no data is needed
+        if (data && data.success) {
+          console.log('操作成功');
+          queryLedStatus()
+        }
+      } catch (error) {
+        console.error('Error in setAllOn:', error);
+      }
+    }
+
   </script>
 </body>
 

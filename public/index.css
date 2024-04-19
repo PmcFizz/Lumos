@@ -48,4 +48,68 @@ body,
   display: inline-block;
   padding: 0;
   min-width: initial;
+  border: 1px solid #ddd
+}
+
+#floatingDiv {
+  position: absolute;
+  padding-top: 6px;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  text-align: center;
+  border-radius: 4px;
+  display: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.change-color-container .color-btn {
+  display: inline-block;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  margin: 4px;
+  padding: 8px;
+}
+
+/* "000000",
+"0000FF",
+"00FF00",
+"00FFFF",
+"FF0000",
+"FF00FF",
+"FFFF00",
+"FFFFFF", */
+
+.color-btn:nth-child(1) {
+  background-color: #000000;
+}
+
+.color-btn:nth-child(2) {
+  background-color: #0000FF;
+}
+
+.color-btn:nth-child(3) {
+  background-color: #00FF00;
+}
+
+.color-btn:nth-child(4) {
+  background-color: #00FFFF;
+}
+
+.color-btn:nth-child(5) {
+  background-color: #FF0000;
+}
+
+.color-btn:nth-child(6) {
+  background-color: #FF00FF;
+}
+
+.color-btn:nth-child(7) {
+  background-color: #FFFF00;
+}
+
+.color-btn:nth-child(8) {
+  background-color: #FFFFFF;
 }

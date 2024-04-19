@@ -92,6 +92,18 @@ const colors = [
   "FFFFFF",
 ];
 
+const colorMap = {
+  "000000": "000",
+  "0000FF": "001",
+  "00FF00": "010",
+  "00FFFF": "011",
+  FF0000: "100",
+  FF00FF: "101",
+  FFFF00: "110",
+  FFFFFF: "111",
+};
+// ["000", "001", "010", "011", "100", "101", "110", "111"];
+
 /**
  * 根据颜色索引和一个新的颜色，获取寄存器的值
  * @param {*} registers 所有寄存器的值
@@ -99,7 +111,7 @@ const colors = [
  * @param {*} newColorIndex 新颜色的索引
  * @returns
  */
-function updateRegisterValues(registers, globalColorIndex, newColorIndex) {
+function updateRegisterValues(registers, globalColorIndex, newColor) {
   // 二进制表示的8种可能的RGB颜色
   const colorMap = ["000", "001", "010", "011", "100", "101", "110", "111"];
 
