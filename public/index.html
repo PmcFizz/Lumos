@@ -49,6 +49,9 @@
             <button type="button" id="set-brightness-btn" class="btn btn-sm btn-primary">Set Brightness</button>
             <button type="button" id="set-color-btn" class="btn btn-sm btn-primary">Set Color</button>
           </p>
+          <p class="mb-1">
+            <button type="button" id="change-mode-btn" class="btn btn-sm btn-primary">Change Mode</button>
+          </p>
         </form>
 
       </div>
@@ -97,6 +100,9 @@
     let isAutoQueryStatus = true
     let registersValues = null
     let clickRBGNum = null
+    const LED = 'led'
+    const RGB_LED = 'rgb_led'
+    let lightMode = LED // led;rgb_led
     const allOnBtn = document.querySelector("#all-on-btn")
     const allOffBtn = document.querySelector("#all-off-btn")
     const startLoopBtn = document.querySelector("#start-loop-btn")
@@ -105,7 +111,9 @@
     const setBrightnessBtn = document.querySelector("#set-brightness-btn")
     const setColorBtn = document.querySelector("#set-color-btn")
     const floatingDiv = document.getElementById('floatingDiv');
-
+    const changeModeBtn = document.querySelector("#change-mode-btn")
+    const rgbLEDContainer = document.querySelector('#rgb-led-container')
+    const ledContainer = document.querySelector("#led-container")
 
     allOnBtn.addEventListener('click', setAllOn)
     allOffBtn.addEventListener('click', setAllOff)
@@ -114,6 +122,7 @@
     queryBtn.addEventListener('click', queryLedStatus)
     setBrightnessBtn.addEventListener('click', setBrightness)
     setColorBtn.addEventListener('click', setColor)
+    changeModeBtn.addEventListener('click', changeMode)
 
     document.getElementById('modbusForm').addEventListener('submit', async function (e) {
       if (interval) {
@@ -234,7 +243,7 @@
           <button type="button" class="${styleClass}"" onclick="toggleStatus(${ledNo}, ${!state})" >${ledNo} ${state ? 'ON' : 'OFF'}</button>
         `);
       })
-      document.querySelector('#led-container').innerHTML = lHtml.join('')
+      ledContainer.innerHTML = lHtml.join('')
     }
 
     function setRGBHtml(data) {
@@ -246,7 +255,7 @@
           <button type="button" class="btn btn-sm rgb-btn" data-ledno="${ledNo}" style="background-color: #${x};">${ledNo}</button>
         `);
       })
-      document.querySelector('#rgb-led-container').innerHTML = lHtml.join('')
+      rgbLEDContainer.innerHTML = lHtml.join('')
 
       initRGBBtnClick()
     }
@@ -290,8 +299,7 @@
       const data = await sendData('/query-led-status', { deviceId: "eb7793a4-0dfa-4b2e-a6ec-94b7753dfc49" })
       if (data.success) {
         registersValues = data.data
-        // setHtml(data.data)
-        setRGBHtml(data.data)
+        renderLightHtml()
       }
     }
 
@@ -338,14 +346,10 @@
     }
 
     function testMode() {
-      // const array = Array(100).fill(0).map(() => ({
-      //   state: Math.random() < 0.5
-      // }));
-      // setHtml(array)
-      let hexColors = generateRandomHexColors(100);
-      setRGBHtml(hexColors)
-
+      registersValues = [273, 0, 0, 0, 0, 273, 0, 0, 0, 0, 273, 0, 0, 0, 0, 273, 0, 0, 0, 0, 273, 0, 0, 0, 0]
       const configData = [1, 96, 1, 255, 1, 2, 0, 255, 16, 20]
+      renderLightHtml()
+
       const indexDomMap = {
         0: 'config_modbusId',
         1: 'config_baudRate',
@@ -360,8 +364,6 @@
       }
 
     }
-
-    testMode()
 
     function initRGBBtnClick() {
       console.log(121)
@@ -389,7 +391,6 @@
     // });
 
     async function changeColor(color) {
-      console.log(clickRBGNum, color)
       const newRegistersValues = updateRegisterValues(registersValues, clickRBGNum, color)
       try {
         const data = await sendData('/writeRegisters', { dataAddress: 10, values: newRegistersValues }); // Assuming empty object if no data is needed
@@ -402,6 +403,28 @@
       }
     }
 
+    function changeMode() {
+      if (lightMode === LED) {
+        lightMode = RGB_LED
+      } else {
+        lightMode = LED
+      }
+      renderLightHtml()
+    }
+
+    function renderLightHtml() {
+      if (lightMode === RGB_LED) {
+        setRGBHtml(registersValues)
+        rgbLEDContainer.classList.remove('hide')
+        ledContainer.classList.add('hide')
+      } else if (lightMode === LED) {
+        setHtml(registersValues)
+        rgbLEDContainer.classList.add('hide')
+        ledContainer.classList.remove('hide')
+      }
+    }
+
+    testMode()
   </script>
 </body>
 

@@ -104,3 +104,7 @@ body,
 .color-btn:nth-child(8) {
   background-color: #FFFFFF;
 }
+
+.hide {
+  display: none !important;
+}
