@@ -1,17 +1,27 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const ModbusRTU = require("modbus-serial");
+const path = require("path");
 const { v4: uuid } = require("uuid");
+const morgan = require("morgan");
+// 当应用被打包时，__dirname 的行为会变化
+const basePath = __dirname;
+// process.env.NODE_ENV === "production" ? process.resourcesPath : __dirname;
+
 // const { JsonDB, Config } = require("node-json-db");
 const deviceConfig = require("./config");
 const client = new ModbusRTU();
 // const db = new JsonDB(new Config("fizzDataBase", true, false, "/"));
-const app = express();
+const server = express();
 const port = 666;
 let interval = null;
 let currentLed = 0;
-app.use(bodyParser.json()); // 支持 JSON 编码的请求体
-app.use(express.static("public")); // 设置静态文件目录
+server.use(morgan("dev"));
+server.use(bodyParser.json()); // 支持 JSON 编码的请求体
+
+server.use(express.static(path.join(basePath, "public")));
+
+// server.use(express.static("public")); // 设置静态文件目录
 let registerNum = 20;
 
 // 点亮下一个LED的函数
@@ -67,7 +77,7 @@ function parseRegisterValuesToLightStates(registers) {
 }
 
 // 提供一个API端点接收Modbus配置并返回寄存器值
-app.post("/configure-modbus", async (req, res) => {
+server.post("/configure-modbus", async (req, res) => {
   const { serialPort, modbusId, deviceName } = req.body;
   console.log("client.isOpen", client.isOpen);
   try {
@@ -109,7 +119,7 @@ app.post("/configure-modbus", async (req, res) => {
 });
 
 // 查询一个设备上所有灯的状态，传入设备id；
-app.post("/query-device-light", async (req, res) => {
+server.post("/query-device-light", async (req, res) => {
   const { deviceId } = req.body;
   // const item = await db.getData(`/devices_detail/0`);
   // const registerNum = item.configData[deviceConfig.outputCircuitsIndex];
@@ -131,7 +141,7 @@ app.post("/query-device-light", async (req, res) => {
 });
 
 // 开始循环亮灯
-app.post("/start-loop-light-sign-led", (req, res) => {
+server.post("/start-loop-light-sign-led", (req, res) => {
   const { registerNum = 2 } = req.body;
   // interval = setInterval(() => activateNextLed(registerNum), 1000); // 每1000毫秒（1秒）激活下一个LED
   res.json({
@@ -141,7 +151,7 @@ app.post("/start-loop-light-sign-led", (req, res) => {
 });
 
 // 停止循环亮灯
-app.post("/stop-loop-light-sign-led", (req, res) => {
+server.post("/stop-loop-light-sign-led", (req, res) => {
   // const { interval } = req.body;
   if (interval) {
     clearInterval(interval);
@@ -150,7 +160,7 @@ app.post("/stop-loop-light-sign-led", (req, res) => {
 });
 
 // 点亮所有灯
-app.post("/all-on-led", async (req, res) => {
+server.post("/all-on-led", async (req, res) => {
   // const item = await db.getData(`/devices_detail/0`);
   // const registerNum = item.configData[deviceConfig.outputCircuitsIndex];
 
@@ -168,7 +178,7 @@ app.post("/all-on-led", async (req, res) => {
 });
 
 // 熄灭所有灯
-app.post("/all-off-led", async (req, res) => {
+server.post("/all-off-led", async (req, res) => {
   // const item = await db.getData(`/devices_detail/0`);
   // const registerNum = item.configData[deviceConfig.outputCircuitsIndex];
 
@@ -186,7 +196,7 @@ app.post("/all-off-led", async (req, res) => {
 });
 
 // 操作单个灯,lightNum:灯编号从1开始，on：需要设置的灯的状态，true或false；
-app.post("/set-light", (req, res) => {
+server.post("/set-light", (req, res) => {
   const { lightNumber, state } = req.body; // 从请求体中获取灯的编号和状态
   let registerAddress = Math.floor((lightNumber - 1) / 16); // 计算寄存器地址
   registerAddress = registerAddress + deviceConfig.ledRegisterStartAddress;
@@ -218,7 +228,7 @@ app.post("/set-light", (req, res) => {
 });
 
 // 查询灯的状态，传入设备ID；
-app.post("/query-led-status", async (req, res) => {
+server.post("/query-led-status", async (req, res) => {
   // const { registerNum = 2 } = req.body; // 从请求体中获取灯的编号和状态
   // const item = await db.getData(`/devices_detail/0`);
   // const registerNum = item.configData[deviceConfig.outputCircuitsIndex];
@@ -239,7 +249,7 @@ app.post("/query-led-status", async (req, res) => {
     });
 });
 
-app.post("/set-led-brightness", async (req, res) => {
+server.post("/set-led-brightness", async (req, res) => {
   const { brightnessValue } = req.body;
 
   client
@@ -257,7 +267,7 @@ app.post("/set-led-brightness", async (req, res) => {
     });
 });
 
-app.post("/set-led-color", async (req, res) => {
+server.post("/set-led-color", async (req, res) => {
   const { colorValue } = req.body;
 
   client
@@ -278,7 +288,7 @@ app.post("/set-led-color", async (req, res) => {
 /**
  * 写入单个寄存器值
  */
-app.post("/writeRegister", async (req, res) => {
+server.post("/writeRegister", async (req, res) => {
   const { dataAddress, value } = req.body;
 
   client
@@ -299,7 +309,7 @@ app.post("/writeRegister", async (req, res) => {
 /**
  * 写入多个寄存器值
  */
-app.post("/writeRegisters", async (req, res) => {
+server.post("/writeRegisters", async (req, res) => {
   const { dataAddress, values } = req.body;
   client
     .writeRegisters(dataAddress, values)
@@ -316,6 +326,6 @@ app.post("/writeRegisters", async (req, res) => {
     });
 });
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
