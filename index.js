@@ -3,7 +3,7 @@ const path = require("path");
 const url = require("url");
 
 // 引入 Express
-require("./app");
+require("./src/app");
 
 let mainWindow;
 

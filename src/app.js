@@ -19,7 +19,7 @@ let currentLed = 0;
 server.use(morgan("dev"));
 server.use(bodyParser.json()); // 支持 JSON 编码的请求体
 
-server.use(express.static(path.join(basePath, "public")));
+server.use(express.static(path.join(basePath, "../", "public")));
 
 // server.use(express.static("public")); // 设置静态文件目录
 let registerNum = 20;

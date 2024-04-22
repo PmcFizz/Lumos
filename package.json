@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node app.js",
+    "dev": "node ./src/app.js",
     "start": "electron .",
     "build:mac-m1": "electron-packager . LUMOS --platform=darwin --arch=arm64 --overwrite --out=build",
     "build:win": "electron-packager . LUMOS --platform=win32 --arch=x64 --icon=.\\public\\lumos.png --overwrite --out=build"
