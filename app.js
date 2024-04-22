@@ -143,7 +143,7 @@ server.post("/query-device-light", async (req, res) => {
 // 开始循环亮灯
 server.post("/start-loop-light-sign-led", (req, res) => {
   const { registerNum = 2 } = req.body;
-  // interval = setInterval(() => activateNextLed(registerNum), 1000); // 每1000毫秒（1秒）激活下一个LED
+  interval = setInterval(() => activateNextLed(registerNum), 1000); // 每1000毫秒（1秒）激活下一个LED
   res.json({
     success: true,
     data: { msg: "开始循环，单灯1秒步进亮" },
