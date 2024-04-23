@@ -15,6 +15,7 @@ build = async () => {
       setupExe: "lumos_setup.exe",
       setupMsi: "lumos_setup.msi",
       version: "0.0.1",
+      loadingGif: "./build/lumos-win32-x64/resources/app/public/loading.gif",
       // iconUrl: "./build/lumos-win32-x64/resources/app/public/lumos.ico",
     });
     console.log("It worked!");
