@@ -1,5 +1,5 @@
 {
-  "name": "LUMOS",
+  "name": "lumos",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
@@ -7,8 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node ./src/app.js",
     "start": "electron .",
-    "build:mac-m1": "electron-packager . LUMOS --platform=darwin --arch=arm64 --overwrite --out=build",
-    "build:win": "electron-packager . LUMOS --platform=win32 --arch=x64 --icon=.\\public\\lumos.ico --overwrite --out=build"
+    "build:mac-m1": "electron-packager . lumos --platform=darwin --arch=arm64 --overwrite --out=build",
+    "build:win": "electron-packager . lumos --platform=win32 --arch=x64 --icon=.\\public\\lumos.ico --overwrite --out=build && node build.js"
   },
   "author": "",
   "license": "ISC",

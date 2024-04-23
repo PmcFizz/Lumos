@@ -5,17 +5,17 @@ const electronInstaller = require("electron-winstaller");
 build = async () => {
   try {
     await electronInstaller.createWindowsInstaller({
-      appDirectory: "./build/LUMOS-win32-x64",
+      appDirectory: "./build/lumos-win32-x64",
       outputDirectory: "./build/installer64",
-      name: "LUMOS",
-      title: "LUMOS",
+      name: "lumos",
+      title: "lumos",
       authors: "Fizz",
       description: "Modbus RGB LED Control Progrom",
-      exe: "LUMOS.exe",
-      setupExe: "LUMOS_setup.exe",
-      setupMsi: "LUMOS_setup.msi",
+      exe: "lumos.exe",
+      setupExe: "lumos_setup.exe",
+      setupMsi: "lumos_setup.msi",
       version: "0.0.1",
-      // iconUrl: "./build/LUMOS-win32-x64/resources/app/public/lumos.ico",
+      // iconUrl: "./build/lumos-win32-x64/resources/app/public/lumos.ico",
     });
     console.log("It worked!");
   } catch (e) {
