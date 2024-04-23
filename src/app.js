@@ -78,11 +78,11 @@ function parseRegisterValuesToLightStates(registers) {
 
 // 提供一个API端点接收Modbus配置并返回寄存器值
 server.post("/configure-modbus", async (req, res) => {
-  const { serialPort, modbusId, deviceName } = req.body;
+  const { serialPort, modbusId, deviceName, baudRate = 9600 } = req.body;
   console.log("client.isOpen", client.isOpen);
   try {
     if (!client.isOpen) {
-      await client.connectRTUBuffered(serialPort, { baudRate: 9600 });
+      await client.connectRTUBuffered(serialPort, { baudRate });
       client.setID(modbusId);
     }
     console.log("Connected to Modbus device.");
