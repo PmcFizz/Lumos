@@ -122,7 +122,7 @@
 
   async function startLoop() {
     try {
-      const data = await sendData("/start-loop-light-sign-led", {}); // Assuming empty object if no data is needed
+      const data = await sendData("/start-loop-light-sign-led", {});
       if (data && data.success) {
         console.log("操作成功");
       }
@@ -133,7 +133,7 @@
 
   async function stopLoop() {
     try {
-      const data = await sendData("/stop-loop-light-sign-led", {}); // Assuming empty object if no data is needed
+      const data = await sendData("/stop-loop-light-sign-led", {});
       if (data && data.success) {
         console.log("操作成功");
       }
@@ -166,7 +166,11 @@
     arr.forEach((x, i) => {
       const ledNo = i + 1;
       lHtml.push(`
-          <button type="button" class="btn btn-sm rgb-btn" data-ledno="${ledNo}" style="background-color: #${x};">${ledNo}</button>
+          <button type="button" class="btn btn-sm rgb-btn"
+            data-ledno="${ledNo}"
+            style="background-color: #${x}; color: ${setRandomColor(x)}">
+            ${ledNo}
+          </button>
         `);
     });
     rgbLEDContainer.innerHTML = lHtml.join("");

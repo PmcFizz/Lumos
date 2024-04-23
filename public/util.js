@@ -158,13 +158,13 @@
   /**
    * 生成背景色相反的字体颜色
    */
-  global.setRandomColor = () => {
+  global.setRandomColor = (bgColor) => {
     // 生成随机颜色
-    var randomColor = "#" + Math.floor(Math.random() * 16777215).toString(16);
-    document.getElementById("colorful-div").style.backgroundColor = randomColor;
+    // var randomColor = "#" + Math.floor(Math.random() * 16777215).toString(16);
+    // document.getElementById("colorful-div").style.backgroundColor = randomColor;
 
     // 计算亮度
-    var bgColor = randomColor.slice(1); // 移除'#'
+    // var bgColor = randomColor.slice(1); // 移除'#'
     var r = parseInt(bgColor.substring(0, 2), 16); // 红色分量
     var g = parseInt(bgColor.substring(2, 4), 16); // 绿色分量
     var b = parseInt(bgColor.substring(4, 6), 16); // 蓝色分量
@@ -172,9 +172,9 @@
 
     // 根据亮度设置文字颜色
     if (brightness > 125) {
-      document.getElementById("colorful-div").style.color = "black"; // 亮背景，用黑色文字
+      return "black"; // 亮背景，用黑色文字
     } else {
-      document.getElementById("colorful-div").style.color = "white"; // 暗背景，用白色文字
+      return "white"; // 暗背景，用白色文字
     }
   };
 })(window);
