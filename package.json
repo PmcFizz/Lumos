@@ -8,7 +8,7 @@
     "dev": "node ./src/app.js",
     "start": "electron .",
     "build:mac-m1": "electron-packager . LUMOS --platform=darwin --arch=arm64 --overwrite --out=build",
-    "build:win": "electron-packager . LUMOS --platform=win32 --arch=x64 --icon=.\\public\\lumos.png --overwrite --out=build"
+    "build:win": "electron-packager . LUMOS --platform=win32 --arch=x64 --icon=.\\public\\lumos.ico --overwrite --out=build"
   },
   "author": "",
   "license": "ISC",
@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "electron": "^30.0.1",
-    "electron-packager": "^17.1.2"
+    "electron-packager": "^17.1.2",
+    "electron-winstaller": "^5.3.1"
   }
 }

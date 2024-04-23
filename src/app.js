@@ -1,3 +1,6 @@
+/**
+ * 不用费劲巴拉地破解了，我准备开源啦。
+ */
 const express = require("express");
 const bodyParser = require("body-parser");
 const ModbusRTU = require("modbus-serial");
