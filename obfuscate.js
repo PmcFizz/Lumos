@@ -28,7 +28,7 @@ async function obfuscateDir(dir, outputDir) {
   const files = fs.readdirSync(dir);
   for (const file of files) {
     const filePath = path.join(dir, file);
-    const outputPath = path.join(outputDir, path.relative("./src", filePath));
+    const outputPath = path.join(outputDir, path.relative(dir, filePath));
     const outputDirPath = path.dirname(outputPath);
 
     // Ensure output directory exists
