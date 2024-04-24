@@ -145,8 +145,8 @@ server.post("/query-device-light", async (req, res) => {
 
 // 开始循环亮灯
 server.post("/start-loop-light-sign-led", (req, res) => {
-  const { registerNum = 2 } = req.body;
-  interval = setInterval(() => activateNextLed(registerNum), 1000); // 每1000毫秒（1秒）激活下一个LED
+  const { registerNum = 6 } = req.body;
+  interval = setInterval(() => activateNextLed(registerNum), 100); // 每1000毫秒（1秒）激活下一个LED
   res.json({
     success: true,
     data: { msg: "开始循环，单灯1秒步进亮" },
@@ -252,22 +252,95 @@ server.post("/query-led-status", async (req, res) => {
     });
 });
 
+// server.post("/set-led-brightness", async (req, res) => {
+//   const { brightnessValue } = req.body;
+
+//   if (interval) {
+//     clearInterval(interval);
+//     res.json({
+//       success: true,
+//       data: { brightnessValue },
+//       msg: `change led brightness to ${brightnessValue} `,
+//     });
+//     return;
+//   }
+//   interval = setInterval(async () => {
+//     brightness = brightness + delta;
+//     brightness = brightness < 0 ? 0 : brightness;
+//     await client.writeRegister(deviceConfig.brightnessIndex, brightness);
+//     if (brightness <= 0 && delta < 0) {
+//       delta = 20; // 改为增加
+//     } else if (brightness >= 255 && delta > 0) {
+//       delta = -20; // 改为减少
+//     }
+//   }, 100);
+//   res.json({
+//     success: true,
+//     data: { brightnessValue },
+//     msg: `change led brightness to ${brightnessValue} `,
+//   });
+
+//   // client
+//   //   .writeRegister(deviceConfig.brightnessIndex, brightnessValue)
+//   //   .then((data) => {
+//   //     res.json({
+//   //       success: true,
+//   //       data: { brightnessValue },
+//   //       msg: `change led brightness to ${brightnessValue} `,
+//   //     });
+//   //   })
+//   //   .catch((error) => {
+//   //     console.error(error);
+//   //     res.json({ success: false, msg: error.message });
+//   //   });
+// });
+
 server.post("/set-led-brightness", async (req, res) => {
   const { brightnessValue } = req.body;
 
-  client
-    .writeRegister(deviceConfig.brightnessIndex, brightnessValue)
-    .then((data) => {
-      res.json({
-        success: true,
-        data: { brightnessValue },
-        msg: `change led brightness to ${brightnessValue} `,
-      });
-    })
-    .catch((error) => {
-      console.error(error);
-      res.json({ success: false, msg: error.message });
-    });
+  // 停止之前的循环
+  if (interval) {
+    clearInterval(interval);
+    interval = null; // 清除定时器变量
+  }
+
+  let brightness = 100;
+  let delta = -10; // 根据初始亮度决定初始增减方向
+
+  // 定义一个异步函数执行写入操作
+  async function updateBrightness() {
+    try {
+      // 写入亮度值到设备
+      await client.writeRegister(deviceConfig.brightnessIndex, brightness);
+      // 调整亮度值
+      brightness += delta;
+      // 限制亮度值在有效范围内
+      if (brightness <= 0 && delta < 0) {
+        brightness = 0;
+        delta = 10; // 改为增加
+      } else if (brightness >= 100 && delta > 0) {
+        brightness = 100;
+        delta = -10; // 改为减少
+      }
+
+      // 继续调整亮度，或者停止
+      if ((delta > 0 && brightness <= 100) || (delta < 0 && brightness >= 0)) {
+        setTimeout(updateBrightness, 100); // 等待100ms后继续
+      }
+    } catch (error) {
+      console.error("Error writing to RS485 device:", error.message);
+    }
+  }
+
+  // 开始循环更新亮度
+  updateBrightness();
+
+  // 响应请求
+  res.json({
+    success: true,
+    data: { brightness },
+    msg: `Change LED brightness to ${brightnessValue}`,
+  });
 });
 
 server.post("/set-led-color", async (req, res) => {
