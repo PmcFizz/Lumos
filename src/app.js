@@ -305,6 +305,8 @@ server.post("/set-led-brightness", async (req, res) => {
   }
 
   let brightness = 100;
+  let maxValue = 255;
+  let minValue = 0;
   let delta = -10; // 根据初始亮度决定初始增减方向
 
   // 定义一个异步函数执行写入操作
@@ -315,17 +317,20 @@ server.post("/set-led-brightness", async (req, res) => {
       // 调整亮度值
       brightness += delta;
       // 限制亮度值在有效范围内
-      if (brightness <= 0 && delta < 0) {
-        brightness = 0;
+      if (brightness <= minValue && delta < minValue) {
+        brightness = minValue;
         delta = 10; // 改为增加
-      } else if (brightness >= 100 && delta > 0) {
-        brightness = 100;
+      } else if (brightness >= maxValue && delta > minValue) {
+        brightness = maxValue;
         delta = -10; // 改为减少
       }
 
       // 继续调整亮度，或者停止
-      if ((delta > 0 && brightness <= 100) || (delta < 0 && brightness >= 0)) {
-        setTimeout(updateBrightness, 100); // 等待100ms后继续
+      if (
+        (delta > minValue && brightness <= maxValue) ||
+        (delta < minValue && brightness >= minValue)
+      ) {
+        setTimeout(updateBrightness, maxValue); // 等待100ms后继续
       }
     } catch (error) {
       console.error("Error writing to RS485 device:", error.message);
