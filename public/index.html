@@ -4,9 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>lumos</title>
+  <title>Lomus</title>
   <link rel="icon" href="lumos.ico" />
-  <!-- 引入 Bootstrap CSS -->
   <link rel="stylesheet" href="./bootstrap.min.css">
   <link rel="stylesheet" href="./index.css">
 </head>
@@ -14,6 +13,7 @@
 <body>
   <div class="container">
     <div class="row h-full">
+      <h3 class="app-title">Lumos</h3>
       <div class="col-3 h-full">
         <h4>Configure Device</h4>
         <form id="modbusForm">
@@ -64,6 +64,7 @@
         <h4>Base Info</h4>
         <div class="row pb-4 border-bottom">
           <div class="col-3">ID: <span id="config_modbusId">——</span></div>
+          <div class="col-3">Status: <span id="config_status">OFF</span></div>
           <div class="col-3">Baud Rate : <span id="config_baudRate">——</span></div>
           <div class="col-3">Work Mode: <span id="config_workMode">——</span></div>
           <div class="col-3">Brightness: <span id="config_brightness">——</span></div>
