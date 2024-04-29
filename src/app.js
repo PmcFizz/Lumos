@@ -287,101 +287,80 @@ server.post("/query-led-status", async (req, res) => {
     });
 });
 
+server.post("/set-led-brightness", async (req, res) => {
+  const { brightnessValue } = req.body;
+  client
+    .writeRegister(deviceConfig.brightnessIndex, brightnessValue)
+    .then((data) => {
+      res.json({
+        success: true,
+        data: { brightnessValue },
+        msg: `change led brightness to ${brightnessValue} `,
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+      res.json({ success: false, msg: error.message });
+    });
+});
+
 // server.post("/set-led-brightness", async (req, res) => {
 //   const { brightnessValue } = req.body;
 
+//   // 停止之前的循环
 //   if (interval) {
 //     clearInterval(interval);
-//     res.json({
-//       success: true,
-//       data: { brightnessValue },
-//       msg: `change led brightness to ${brightnessValue} `,
-//     });
-//     return;
+//     interval = null; // 清除定时器变量
 //   }
-//   interval = setInterval(async () => {
-//     brightness = brightness + delta;
-//     brightness = brightness < 0 ? 0 : brightness;
-//     await client.writeRegister(deviceConfig.brightnessIndex, brightness);
-//     if (brightness <= 0 && delta < 0) {
-//       delta = 20; // 改为增加
-//     } else if (brightness >= 255 && delta > 0) {
-//       delta = -20; // 改为减少
+
+//   let brightness = 255;
+//   let maxValue = 255;
+//   let minValue = 0;
+//   let delta = -50; // 根据初始亮度决定初始增减方向
+
+//   // 定义一个异步函数执行写入操作
+//   async function updateBrightness() {
+//     try {
+//       // 写入亮度值到设备
+//       await client.writeRegister(deviceConfig.brightnessIndex, brightness);
+//       // 调整亮度值
+//       brightness += delta;
+//       // 限制亮度值在有效范围内
+//       if (brightness <= minValue && delta < minValue) {
+//         brightness = minValue;
+//         delta = 10; // 改为增加
+//       } else if (brightness >= maxValue && delta > minValue) {
+//         brightness = maxValue;
+//         delta = -10; // 改为减少
+//       }
+
+//       // 继续调整亮度，或者停止
+//       // if (
+//       //   (delta > minValue && brightness <= maxValue) ||
+//       //   (delta < minValue && brightness >= minValue)
+//       // ) {
+//       //   setTimeout(updateBrightness, maxValue); // 等待100ms后继续
+//       // }
+//     } catch (error) {
+//       console.error("Error writing to RS485 device:", error.message);
 //     }
-//   }, 100);
+//   }
+
+//   // 开始循环更新亮度
+
+//   interval = setInterval(() => {
+//     updateBrightness();
+//   }, 1000);
+
+//   // updateBrightness();
+
+//   // 响应请求
 //   res.json({
 //     success: true,
-//     data: { brightnessValue },
-//     msg: `change led brightness to ${brightnessValue} `,
+//     data: { brightness },
+//     msg: `Change LED brightness to ${brightnessValue}`,
 //   });
-
-//   // client
-//   //   .writeRegister(deviceConfig.brightnessIndex, brightnessValue)
-//   //   .then((data) => {
-//   //     res.json({
-//   //       success: true,
-//   //       data: { brightnessValue },
-//   //       msg: `change led brightness to ${brightnessValue} `,
-//   //     });
-//   //   })
-//   //   .catch((error) => {
-//   //     console.error(error);
-//   //     res.json({ success: false, msg: error.message });
-//   //   });
 // });
-
-server.post("/set-led-brightness", async (req, res) => {
-  const { brightnessValue } = req.body;
-
-  // 停止之前的循环
-  if (interval) {
-    clearInterval(interval);
-    interval = null; // 清除定时器变量
-  }
-
-  let brightness = 100;
-  let maxValue = 255;
-  let minValue = 0;
-  let delta = -10; // 根据初始亮度决定初始增减方向
-
-  // 定义一个异步函数执行写入操作
-  async function updateBrightness() {
-    try {
-      // 写入亮度值到设备
-      await client.writeRegister(deviceConfig.brightnessIndex, brightness);
-      // 调整亮度值
-      brightness += delta;
-      // 限制亮度值在有效范围内
-      if (brightness <= minValue && delta < minValue) {
-        brightness = minValue;
-        delta = 10; // 改为增加
-      } else if (brightness >= maxValue && delta > minValue) {
-        brightness = maxValue;
-        delta = -10; // 改为减少
-      }
-
-      // 继续调整亮度，或者停止
-      if (
-        (delta > minValue && brightness <= maxValue) ||
-        (delta < minValue && brightness >= minValue)
-      ) {
-        setTimeout(updateBrightness, maxValue); // 等待100ms后继续
-      }
-    } catch (error) {
-      console.error("Error writing to RS485 device:", error.message);
-    }
-  }
-
-  // 开始循环更新亮度
-  updateBrightness();
-
-  // 响应请求
-  res.json({
-    success: true,
-    data: { brightness },
-    msg: `Change LED brightness to ${brightnessValue}`,
-  });
-});
 
 server.post("/set-led-color", async (req, res) => {
   const { colorValue } = req.body;

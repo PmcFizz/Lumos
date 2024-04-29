@@ -23,7 +23,10 @@
   allOffBtn.addEventListener("click", setAllOff);
   startLoopBtn.addEventListener("click", startLoop);
   stopLoopBtn.addEventListener("click", stopLoop);
-  queryBtn.addEventListener("click", changeQueryWay); // changeQueryWay; queryLedStatus
+  // queryBtn.addEventListener("click", changeQueryWay); // changeQueryWay; queryLedStatus
+
+  queryBtn.addEventListener("click", queryLedStatus);
+
   setBrightnessBtn.addEventListener("click", setBrightness);
   setColorBtn.addEventListener("click", setColor);
   changeModeBtn.addEventListener("click", changeMode);
@@ -206,19 +209,21 @@
   }
 
   async function changeQueryWay() {
-    if (isAutoQueryStatus) {
-      if (interval) {
-        clearInterval(interval);
-        queryBtn.innerText = "Manual Query Led Status";
-      }
-      isAutoQueryStatus = false;
-    } else {
-      interval = setInterval(() => {
-        queryLedStatus();
-      }, period * 1000);
-      queryBtn.innerText = "Auto Query Led Status";
-      isAutoQueryStatus = true;
-    }
+    queryLedStatus();
+
+    // if (isAutoQueryStatus) {
+    //   if (interval) {
+    //     clearInterval(interval);
+    //     queryBtn.innerText = "Manual Query Led Status";
+    //   }
+    //   isAutoQueryStatus = false;
+    // } else {
+    //   interval = setInterval(() => {
+    //     queryLedStatus();
+    //   }, period * 1000);
+    //   queryBtn.innerText = "Auto Query Led Status";
+    //   isAutoQueryStatus = true;
+    // }
   }
 
   async function queryLedStatus() {
