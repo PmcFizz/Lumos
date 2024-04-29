@@ -7,15 +7,15 @@ build = async () => {
     await electronInstaller.createWindowsInstaller({
       appDirectory: "./build/lumos-win32-x64",
       outputDirectory: "./build/installer64",
-      name: "lumos",
-      title: "lumos",
+      name: "Lumos",
+      title: "Lumos",
       authors: "Fizz",
       description: "Modbus RGB LED Control Progrom",
-      exe: "lumos.exe",
-      setupExe: "lumos_setup.exe",
-      setupMsi: "lumos_setup.msi",
-      version: "0.0.1",
-      loadingGif: "./build/lumos-win32-x64/resources/app/public/loading.gif",
+      exe: "Lumos.exe",
+      setupExe: "Lumos_setup.exe",
+      setupMsi: "Lumos_setup.msi",
+      version: "0.0.2",
+      // loadingGif: "./build/lumos-win32-x64/resources/app/public/loading.gif",
       // iconUrl: "./build/lumos-win32-x64/resources/app/public/lumos.ico",
     });
     console.log("It worked!");

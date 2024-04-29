@@ -137,6 +137,7 @@ server.post("/configure-modbus", async (req, res) => {
         deviceName,
         serialPort,
         modbusId,
+        status: "ON",
         configData: data.data,
       },
     });
@@ -144,6 +145,15 @@ server.post("/configure-modbus", async (req, res) => {
     console.error(error);
     res.json({ success: false, message: error.message });
   }
+});
+
+// 检查设备状态
+server.post("/checkStatus", async (req, res) => {
+  if (client.isOpen) {
+    res.json({ success: true, data: true, message: "设备已连接" });
+    return;
+  }
+  res.json({ success: true, data: false, message: "设备未连接" });
 });
 
 // 查询一个设备上所有灯的状态，传入设备id；

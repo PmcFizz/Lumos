@@ -1,7 +1,7 @@
 (function (global) {
   let interval = null;
   let brightnessValue = 10;
-  let isAutoQueryStatus = true;
+  let isAutoQueryStatus = false;
   let registersValues = null;
   let clickRBGNum = null;
   const LED = "led";
@@ -23,7 +23,7 @@
   allOffBtn.addEventListener("click", setAllOff);
   startLoopBtn.addEventListener("click", startLoop);
   stopLoopBtn.addEventListener("click", stopLoop);
-  queryBtn.addEventListener("click", queryLedStatus);
+  queryBtn.addEventListener("click", changeQueryWay); // changeQueryWay; queryLedStatus
   setBrightnessBtn.addEventListener("click", setBrightness);
   setColorBtn.addEventListener("click", setColor);
   changeModeBtn.addEventListener("click", changeMode);
@@ -35,46 +35,52 @@
         clearInterval(interval);
       }
       e.preventDefault();
-      const deviceName = document.querySelector("#deviceName").value;
-      const serialPort = document.querySelector("#serialPort").value;
-      const modbusId = document.querySelector("#modbusId").value;
-      const baudRate = document.querySelector("#baudRate").value;
-      const period = document.querySelector("#period").value;
-      const data = await sendData("/configure-modbus", {
-        serialPort,
-        modbusId,
-        deviceName,
-        baudRate: parseInt(baudRate),
-      });
-
-      if (data.success) {
-        const indexDomMap = {
-          0: "config_modbusId",
-          1: "config_baudRate",
-          2: "config_workMode",
-          // 3: 'config_modbusId',
-          // 4: 'config_modbusId',
-          // 5: 'config_modbusId',
-          // 6: 'config_modbusId',
-          7: "config_brightness",
-          8: "config_effectiveBit",
-          9: "config_outputCircuits",
-        };
-        data.data.configData[1] = data.data.configData[1] * 100;
-        for (const [key, value] of Object.entries(indexDomMap)) {
-          document.querySelector(`#${value}`).innerText =
-            data.data.configData[key];
-        }
-
-        // if (isAutoQueryStatus) {
-        //   interval = setInterval(() => {
-        //     queryLedStatus()
-        //   }, period * 1000)
-        // }
-      } else {
-        alert("Failed to read registers: " + data.message);
-      }
+      await connectDevices();
     });
+
+  async function connectDevices() {
+    const deviceName = document.querySelector("#deviceName").value;
+    const serialPort = document.querySelector("#serialPort").value;
+    const modbusId = document.querySelector("#modbusId").value;
+    const baudRate = document.querySelector("#baudRate").value;
+    const period = document.querySelector("#period").value;
+    const data = await sendData("/configure-modbus", {
+      serialPort,
+      modbusId,
+      deviceName,
+      baudRate: parseInt(baudRate),
+    });
+
+    if (data.success) {
+      const indexDomMap = {
+        0: "config_modbusId",
+        1: "config_baudRate",
+        2: "config_workMode",
+        // 3: 'config_modbusId',
+        // 4: 'config_modbusId',
+        // 5: 'config_modbusId',
+        // 6: 'config_modbusId',
+        7: "config_brightness",
+        8: "config_effectiveBit",
+        9: "config_outputCircuits",
+      };
+      data.data.configData[1] = data.data.configData[1] * 100;
+      document.querySelector(`#config_status`).innerText = data.data.status;
+      for (const [key, value] of Object.entries(indexDomMap)) {
+        document.querySelector(`#${value}`).innerText =
+          data.data.configData[key];
+      }
+
+      changeQueryWay();
+      // if (isAutoQueryStatus) {
+      //   interval = setInterval(() => {
+      //     queryLedStatus();
+      //   }, period * 1000);
+      // }
+    } else {
+      alert("Failed to read registers: " + data.message);
+    }
+  }
 
   async function sendData(url, dataToSend) {
     try {
@@ -205,11 +211,13 @@
         clearInterval(interval);
         queryBtn.innerText = "Manual Query Led Status";
       }
+      isAutoQueryStatus = false;
     } else {
       interval = setInterval(() => {
         queryLedStatus();
       }, period * 1000);
       queryBtn.innerText = "Auto Query Led Status";
+      isAutoQueryStatus = true;
     }
   }
 
@@ -357,5 +365,22 @@
     }
   }
 
+  async function checkStatus() {
+    try {
+      const data = await sendData("/checkStatus");
+      if (data && data.success) {
+        document.querySelector(`#config_status`).innerText = data.data
+          ? "ON"
+          : "OFF";
+        if (data.data) {
+          connectDevices();
+        }
+      }
+    } catch (error) {
+      console.error("Error in setAllOn:", error);
+    }
+  }
+
   testMode();
+  checkStatus();
 })(window);
