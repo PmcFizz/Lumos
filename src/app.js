@@ -79,6 +79,31 @@ function parseRegisterValuesToLightStates(registers) {
   return lightStates;
 }
 
+function initializeRegisters() {
+  let registers = new Array(10).fill(0); // 创建10个寄存器，初始值都是0
+  registers[0] = 0b100 << 12; // 在第一个寄存器的最左边放置一个绿色像素（100）
+  return registers;
+}
+
+function shiftGreen(registers) {
+  let firstBits = registers[0] >>> 12; // 获取第一个寄存器最左边的3位
+  for (let i = 0; i < registers.length - 1; i++) {
+    registers[i] = (registers[i] << 3) | (registers[i + 1] >>> 12); // 向左移动3位并从下一个寄存器获取最左边的3位
+  }
+  registers[registers.length - 1] =
+    (registers[registers.length - 1] << 3) | firstBits; // 处理最后一个寄存器，将第一个寄存器原来的最左3位放在最右边
+}
+
+function simulate() {
+  let registers = initializeRegisters();
+  setInterval(() => {
+    shiftGreen(registers);
+    console.log(registers.map((r) => r.toString(2).padStart(15, "0"))); // 输出所有寄存器的当前状态，用于调试
+  }, 1000); // 每秒更新一次
+}
+
+// simulate(); // 开始模拟
+
 // 提供一个API端点接收Modbus配置并返回寄存器值
 server.post("/configure-modbus", async (req, res) => {
   const { serialPort, modbusId, deviceName, baudRate = 9600 } = req.body;
