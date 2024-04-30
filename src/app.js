@@ -380,6 +380,16 @@ server.post("/set-led-color", async (req, res) => {
     });
 });
 
+server.post("/loop-led-color", async (req, res) => {
+  const { colorValue } = req.body;
+  simulate();
+  res.json({
+    success: true,
+    data: { colorValue },
+    msg: `change led color to ${colorValue} `,
+  });
+});
+
 /**
  * 写入单个寄存器值
  */

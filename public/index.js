@@ -255,6 +255,7 @@
   async function setColor() {
     try {
       const data = await sendData("/set-led-color", { colorValue: "" }); // Assuming empty object if no data is needed
+      // const data = await sendData("/loop-led-color", { colorValue: "" }); // Assuming empty object if no data is needed
       if (data && data.success) {
         console.log("操作成功");
       }
