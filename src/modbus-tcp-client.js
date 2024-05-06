@@ -12,15 +12,15 @@ client.setID(1);
 // 读取0-10个寄存器的值
 setInterval(function () {
   client.readHoldingRegisters(0, 10, function (err, data) {
-    console.log(data.data);
+    console.log(data);
   });
 }, 1000);
 
-let i = 1
+let i = 1;
 setInterval(() => {
   // 从地址5的寄存器开始，写入i，i*2 + 1
-  client.writeRegisters(5, [i, i*2 + 1]).then(() => {
-    console.log('write success')
-    i++
+  client.writeRegisters(5, [i, i * 2 + 1]).then(() => {
+    console.log("write success");
+    i++;
   });
 }, 1000);
