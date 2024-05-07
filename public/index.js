@@ -175,7 +175,7 @@
     arr.forEach((x, i) => {
       const ledNo = i + 1;
       lHtml.push(`
-          <button type="button" class="btn btn-sm rgb-btn"
+          <button type="button" class="btn btn-sm rgb-btn relative"
             data-ledno="${ledNo}"
             style="background-color: #${x}; color: ${setRandomColor(x)}">
             ${ledNo}
@@ -309,12 +309,10 @@
     document.querySelectorAll(".rgb-btn").forEach((button) => {
       button.addEventListener("click", function (event) {
         const ledNo = event.target.dataset.ledno;
+
         clickRBGNum = ledNo;
         var floatingDiv = document.getElementById("floatingDiv");
-        // 设置悬浮 div 的位置在按钮上方约 10 像素
-        floatingDiv.style.left = event.pageX - 125 + "px"; // 点击位置的横坐标
-        floatingDiv.style.top =
-          event.pageY - floatingDiv.offsetHeight - 10 + "px"; // 点击位置的纵坐标，向上偏移 div 的高度加额外的 10px
+        this.appendChild(floatingDiv);
         floatingDiv.style.display = "block"; // 显示悬浮 div
       });
     });
