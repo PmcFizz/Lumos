@@ -1,1 +1,29 @@
-{"devices":[{"id":"111e00f4-36a0-4bbb-9ab4-24d3a27ca16e","deviceName":"fizz","serialPort":"/dev/tty.usbserial-130","modbusId":"1"}],"devices_detail":[{"id":"d283ef29-dda7-4faa-9694-e16ecc984d01","deviceId":"111e00f4-36a0-4bbb-9ab4-24d3a27ca16e","deviceName":"fizz","configData":[1,96,1,255,1,2,0,10,15,20]}]}
+{
+  "devices": [
+    {
+      "id": "111e00f4-36a0-4bbb-9ab4-24d3a27ca16e",
+      "deviceName": "fizz",
+      "serialPort": "/dev/tty.usbserial-130",
+      "modbusId": "1"
+    }
+  ],
+  "devices_detail": [
+    {
+      "id": "d283ef29-dda7-4faa-9694-e16ecc984d01",
+      "deviceId": "111e00f4-36a0-4bbb-9ab4-24d3a27ca16e",
+      "deviceName": "fizz",
+      "configData": [
+        1,
+        96,
+        1,
+        255,
+        1,
+        2,
+        0,
+        10,
+        15,
+        20
+      ]
+    }
+  ]
+}

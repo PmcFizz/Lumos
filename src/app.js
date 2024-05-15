@@ -11,10 +11,10 @@ const morgan = require("morgan");
 const basePath = __dirname;
 // process.env.NODE_ENV === "production" ? process.resourcesPath : __dirname;
 
-// const { JsonDB, Config } = require("node-json-db");
+const { JsonDB, Config } = require("node-json-db");
 const deviceConfig = require("./config");
 const client = new ModbusRTU();
-// const db = new JsonDB(new Config("fizzDataBase", true, false, "/"));
+const db = new JsonDB(new Config("fizzDataBase", true, false, "/"));
 const server = express();
 const port = 666;
 let interval = null;
