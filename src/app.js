@@ -7,6 +7,7 @@ const ModbusRTU = require("modbus-serial");
 const path = require("path");
 const { v4: uuid } = require("uuid");
 const morgan = require("morgan");
+const schedule = require("node-schedule");
 // 当应用被打包时，__dirname 的行为会变化
 const basePath = __dirname;
 // process.env.NODE_ENV === "production" ? process.resourcesPath : __dirname;
@@ -101,6 +102,18 @@ function simulate() {
     console.log(registers.map((r) => r.toString(2).padStart(15, "0"))); // 输出所有寄存器的当前状态，用于调试
   }, 1000); // 每秒更新一次
 }
+
+// 添加定时任务的路由
+server.post("/schedule", (req, res) => {
+  const { dateStr, task } = req.body;
+  // 使用node-schedule计划一个任务
+  const date = new Date(dateStr);
+  schedule.scheduleJob(date, function () {
+    // 这里写你需要执行的任务，比如删除记录
+    console.log(`${new Date()} Executing 1111 task: ${task}`);
+  });
+  res.send("Task scheduled");
+});
 
 // simulate(); // 开始模拟
 
