@@ -12,10 +12,9 @@ const schedule = require("node-schedule");
 const basePath = __dirname;
 // process.env.NODE_ENV === "production" ? process.resourcesPath : __dirname;
 
-const { JsonDB, Config } = require("node-json-db");
 const deviceConfig = require("./config");
+const { saveDevice, saveDeviceConfig, saveDeviceRegister } = require("./db");
 const client = new ModbusRTU();
-const db = new JsonDB(new Config("fizzDataBase", true, false, "/"));
 const server = express();
 const port = 666;
 let interval = null;
@@ -129,18 +128,16 @@ server.post("/configure-modbus", async (req, res) => {
     console.log("Connected to Modbus device.");
     // 读取前10个寄存器的值，索引为0-9
     const data = await client.readHoldingRegisters(0, 10);
-    console.log(1);
     const deviceId = uuid();
     const deviceDetailId = uuid();
     registerNum = data.data[deviceConfig.outputCircuitsIndex];
-    // await db.push("/devices", [
-    //   { id: deviceId, deviceName, serialPort, modbusId },
-    // ]);
-    // console.log(2);
-    // await db.push("/devices_detail", [
-    //   { id: deviceDetailId, deviceId, deviceName, configData: data.data },
-    // ]);
-    console.log(3);
+    await saveDevice({ id: deviceId, deviceName, serialPort, modbusId });
+    await saveDeviceConfig({
+      id: deviceConfigId,
+      deviceId,
+      deviceName,
+      configData: data.data,
+    });
     // data.data = [1, 96, 1, 255, 1, 2, 0, 255, 16, 20];
     res.json({
       success: true,
@@ -177,7 +174,8 @@ server.post("/query-device-light", async (req, res) => {
 
   client
     .readHoldingRegisters(deviceConfig.ledRegisterStartAddress, registerNum)
-    .then((data) => {
+    .then(async (data) => {
+      await saveDeviceRegister(data.data);
       // let lightsStates = parseRegisterValuesToLightStates(data.data);
       res.json({
         success: true,
@@ -286,7 +284,8 @@ server.post("/query-led-status", async (req, res) => {
 
   client
     .readHoldingRegisters(deviceConfig.ledRegisterStartAddress, registerNum)
-    .then((data) => {
+    .then(async (data) => {
+      await saveDeviceRegister(data.data);
       // let lightsStates = parseRegisterValuesToLightStates(data.data);
       res.json({
         success: true,
