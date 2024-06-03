@@ -8,12 +8,18 @@ const path = require("path");
 const { v4: uuid } = require("uuid");
 const morgan = require("morgan");
 const schedule = require("node-schedule");
+const { updateRegisters } = require("../group");
 // 当应用被打包时，__dirname 的行为会变化
 const basePath = __dirname;
 // process.env.NODE_ENV === "production" ? process.resourcesPath : __dirname;
 
 const deviceConfig = require("./config");
-const { saveDevice, saveDeviceConfig, saveDeviceRegister } = require("./db");
+const {
+  saveDevice,
+  saveDeviceConfig,
+  saveDeviceRegister,
+  getDeviceRegister,
+} = require("./db");
 const client = new ModbusRTU();
 const server = express();
 const port = 666;
@@ -104,14 +110,31 @@ function simulate() {
 
 // 添加定时任务的路由
 server.post("/schedule", (req, res) => {
-  const { dateStr, task } = req.body;
+  const { dateStr, taskData } = req.body;
   // 使用node-schedule计划一个任务
   const date = new Date(dateStr);
-  schedule.scheduleJob(date, function () {
-    // 这里写你需要执行的任务，比如删除记录
-    console.log(`${new Date()} Executing 1111 task: ${task}`);
+
+  schedule.scheduleJob(date, async () => {
+    const currentValue = await getDeviceRegister();
+    const newValue = updateRegisters(currentValue, taskData);
+    client
+      .writeRegisters(deviceConfig.ledRegisterStartAddress, newValue)
+      .then(async () => {
+        await saveDeviceRegister(newValue);
+        // 这里写你需要执行的任务，比如删除记录
+        console.log(`${new Date()} Executing task: ${taskData}`);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   });
-  res.send("Task scheduled");
+  res.json({
+    success: true,
+    data: {
+      dateStr,
+      taskData,
+    },
+  });
 });
 
 // simulate(); // 开始模拟
@@ -129,7 +152,7 @@ server.post("/configure-modbus", async (req, res) => {
     // 读取前10个寄存器的值，索引为0-9
     const data = await client.readHoldingRegisters(0, 10);
     const deviceId = uuid();
-    const deviceDetailId = uuid();
+    const deviceConfigId = uuid();
     registerNum = data.data[deviceConfig.outputCircuitsIndex];
     await saveDevice({ id: deviceId, deviceName, serialPort, modbusId });
     await saveDeviceConfig({
@@ -143,7 +166,7 @@ server.post("/configure-modbus", async (req, res) => {
       success: true,
       data: {
         deviceId,
-        deviceDetailId,
+        deviceConfigId,
         deviceName,
         serialPort,
         modbusId,
@@ -435,6 +458,31 @@ server.post("/writeRegisters", async (req, res) => {
         success: true,
         data: { dataAddress, values },
         msg: `change ${dataAddress} to ${values} `,
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+      res.json({ success: false, msg: error.message });
+    });
+});
+
+/**
+ * 群组操作多个灯
+ */
+server.post("/groupLed", async (req, res) => {
+  const { open, close } = req.body;
+  console.log(open, close);
+  const currentValue = await getDeviceRegister();
+  console.log(currentValue);
+  const newValue = updateRegisters(currentValue, { open, close });
+  client
+    .writeRegisters(deviceConfig.ledRegisterStartAddress, newValue)
+    .then(async () => {
+      await saveDeviceRegister(newValue);
+      res.json({
+        success: true,
+        data: { open, close },
+        msg: `success close:${close}, open:${open} `,
       });
     })
     .catch((error) => {

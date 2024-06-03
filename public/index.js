@@ -14,6 +14,8 @@
   const queryBtn = document.querySelector("#query-btn");
   const setBrightnessBtn = document.querySelector("#set-brightness-btn");
   const setColorBtn = document.querySelector("#set-color-btn");
+  const groupSetBtn = document.querySelector("#group-set-btn");
+  const scheduleSetBtn = document.querySelector("#schedule-set-btn");
   const floatingDiv = document.getElementById("floatingDiv");
   const changeModeBtn = document.querySelector("#change-mode-btn");
   const rgbLEDContainer = document.querySelector("#rgb-led-container");
@@ -29,6 +31,8 @@
 
   setBrightnessBtn.addEventListener("click", setBrightness);
   setColorBtn.addEventListener("click", setColor);
+  groupSetBtn.addEventListener("click", groupSetLed);
+  scheduleSetBtn.addEventListener("click", scheduleSetLed);
   changeModeBtn.addEventListener("click", changeMode);
 
   document
@@ -254,11 +258,50 @@
 
   async function setColor() {
     try {
-      const data = await sendData("/set-led-color", { colorValue: "" }); // Assuming empty object if no data is needed
-      // const data = await sendData("/loop-led-color", { colorValue: "" }); // Assuming empty object if no data is needed
+      const data = await sendData("/set-led-color", { colorValue: "" });
       if (data && data.success) {
         console.log("操作成功");
       }
+      queryLedStatus();
+    } catch (error) {
+      console.error("Error in setAllOn:", error);
+    }
+  }
+
+  let open = true;
+  async function groupSetLed() {
+    const mid = [4, 5, 6];
+    try {
+      const data = await sendData("/groupLed", {
+        open: open ? mid.map((x) => x + 3) : mid.map((x) => x - 3),
+        close: open ? mid.map((x) => x - 3) : mid.map((x) => x + 3),
+      });
+      if (data && data.success) {
+        console.log("操作成功");
+        open = !open;
+      }
+      queryLedStatus();
+    } catch (error) {
+      console.error("Error in setAllOn:", error);
+    }
+  }
+
+  async function scheduleSetLed() {
+    try {
+      const now = new Date().getTime();
+      const dateStr = new Date(now + 60 * 1000);
+      const data = await sendData("/schedule", {
+        dateStr,
+        taskData: {
+          open: [1, 2, 3],
+          close: [4, 5, 6],
+        },
+      });
+      if (data && data.success) {
+        window.alert(`1分钟后开启1，2，3灯，关闭4，5，6`);
+        console.log("操作成功");
+      }
+      queryLedStatus();
     } catch (error) {
       console.error("Error in setAllOn:", error);
     }

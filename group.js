@@ -37,5 +37,11 @@ const request = {
   close: [4, 9, 53, 78],
 };
 
-const updatedRegisters = updateRegisters(currentRegisters, request);
-console.log(updatedRegisters);
+module.exports = {
+  updateRegisters,
+  // saveDeviceConfig,
+  // saveDeviceRegister,
+};
+
+// const updatedRegisters = updateRegisters(currentRegisters, request);
+// console.log(updatedRegisters);

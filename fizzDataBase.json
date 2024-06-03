@@ -1,0 +1,1 @@
+{"devices":{"id":"b9fc4aa7-2262-4982-9581-1ee70852945d","deviceName":"fizz","serialPort":"/dev/tty.usbserial-120","modbusId":"1"},"deviceConfig":{"id":"12c1cef1-22eb-427a-aba1-c58a789ec789","deviceId":"b9fc4aa7-2262-4982-9581-1ee70852945d","deviceName":"fizz","configData":[1,96,1,2,2,2,0,255,16,15]},"deviceRegister":[455,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}
