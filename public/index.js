@@ -256,6 +256,7 @@
     }
   }
 
+  // TODO 设置整体颜色
   async function setColor() {
     try {
       const data = await sendData("/set-led-color", { colorValue: "" });
