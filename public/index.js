@@ -271,11 +271,12 @@
 
   let open = true;
   async function groupSetLed() {
-    const mid = [4, 5, 6];
+    const open = document.querySelector("#open-led-num").value;
+    const close = document.querySelector("#close-led-num").value;
     try {
       const data = await sendData("/groupLed", {
-        open: open ? mid.map((x) => x + 3) : mid.map((x) => x - 3),
-        close: open ? mid.map((x) => x - 3) : mid.map((x) => x + 3),
+        open: open.split(","),
+        close: close.split(","),
       });
       if (data && data.success) {
         console.log("操作成功");
@@ -289,13 +290,16 @@
 
   async function scheduleSetLed() {
     try {
-      const now = new Date().getTime();
-      const dateStr = new Date(now + 60 * 1000);
+      const scheduleTime = document.querySelector("#schedule-time").value;
+      const open = document.querySelector("#open-led-num").value;
+      const close = document.querySelector("#close-led-num").value;
+      // const now = new Date().getTime();
+      // const dateStr = new Date(now + 60 * 1000);
       const data = await sendData("/schedule", {
-        dateStr,
+        dateStr: scheduleTime,
         taskData: {
-          open: [1, 2, 3],
-          close: [4, 5, 6],
+          open,
+          close,
         },
       });
       if (data && data.success) {

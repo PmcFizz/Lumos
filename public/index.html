@@ -17,23 +17,23 @@
       <div class="col-3 h-full">
         <h4>Configure Device</h4>
         <form id="modbusForm">
-          <div class="form-group mb-2">
+          <div class="form-group mb-1">
             <label for="deviceName" class="col-form-label-sm mb-0">Device Name:</label>
             <input type="text" class="form-control form-control-sm" value="fizz" id="deviceName" required>
           </div>
-          <div class="form-group mb-2">
+          <div class="form-group mb-1">
             <label for="serialPort" class="col-form-label-sm mb-0">Serial Port:</label>
             <input type="text" class="form-control form-control-sm" id="serialPort" required>
           </div>
-          <div class="form-group mb-2">
+          <div class="form-group mb-1">
             <label for="modbusId" class="col-form-label-sm mb-0">Modbus ID:</label>
             <input type="number" class="form-control form-control-sm" value="1" id="modbusId" required>
           </div>
-          <div class="form-group mb-2">
+          <div class="form-group mb-1">
             <label for="baudRate" class="col-form-label-sm mb-0">Baud Rate:</label>
             <input type="number" class="form-control form-control-sm" value=9600 id="baudRate" required>
           </div>
-          <div class="form-group mb-2 hide">
+          <div class="form-group mb-1 hide">
             <label for="period" class="col-form-label-sm mb-0">Period(s):</label>
             <input type="number" class="form-control form-control-sm" value="6" id="period" required>
           </div>
@@ -49,15 +49,53 @@
             <button type="button" id="start-loop-btn" class="btn btn-sm btn-primary">Start Loop</button>
             <button type="button" id="stop-loop-btn" class="btn btn-sm btn-primary">Stop Loop</button>
           </p>
-          <p class="mb-1">
+          <div class="mb-1 pt-1 pb-1 border-top border-bottom">
+
+            <div class="form-group mb-1">
+              <label for="led-brightness" class="col-form-label-sm mb-0">Led Brightness:</label>
+              <input type="range" min="0" max="225" class="form-control-range" id="led-brightness">
+            </div>
+
+            <!--led color-->
+            <div class="form-group mb-1">
+              <label for="led-brightness" class="col-form-label-sm mb-0">Led Color:</label>
+
+              <div>
+                <div class="change-color-container">
+                  <span class="color-btn" onclick="changeColor('000000')"></span>
+                  <span class="color-btn" onclick="changeColor('0000FF')"></span>
+                  <span class="color-btn" onclick="changeColor('00FF00')"></span>
+                  <span class="color-btn" onclick="changeColor('00FFFF')"></span>
+                  <span class="color-btn" onclick="changeColor('FF0000')"></span>
+                  <span class="color-btn" onclick="changeColor('FF00FF')"></span>
+                  <span class="color-btn" onclick="changeColor('FFFF00')"></span>
+                  <span class="color-btn" onclick="changeColor('FFFFFF')"></span>
+                </div>
+              </div>
+            </div>
+
             <button type="button" id="set-brightness-btn" class="btn btn-sm btn-primary">Set Brightness</button>
             <button type="button" id="set-color-btn" class="btn btn-sm btn-primary">Set Color</button>
-          </p>
-          <p class="mb-1">
-            <button type="button" id="group-set-btn" class="btn btn-sm btn-primary">Group Set</button>
+          </div>
+          <div class="mb-1 pb-1 border-top border-bottom">
 
+            <div class="form-group mb-1">
+              <label for="open-led-num" class="col-form-label-sm mb-0">Open Led:</label>
+              <input type="text" class="form-control form-control-sm" value="4,5,6" id="open-led-num">
+            </div>
+            <div class="form-group mb-1">
+              <label for="close-led-num" class="col-form-label-sm mb-0">Close Led:</label>
+              <input type="text" class="form-control form-control-sm" value="1,2,3" id="close-led-num">
+            </div>
+            <div class="form-group mb-1">
+              <label for="schedule-time" class="col-form-label-sm mb-0">Schedule Time:</label>
+              <input type="text" class="form-control form-control-sm" placeholder="YYYY-MM-DD HH:dd:ss"
+                id="schedule-time">
+            </div>
+
+            <button type="button" id="group-set-btn" class="btn btn-sm btn-primary">Group Set</button>
             <button type="button" id="schedule-set-btn" class="btn btn-sm btn-primary">Schedule Set</button>
-          </p>
+          </div>
           <p class="mb-1">
             <button type="button" id="change-mode-btn" class="btn btn-sm btn-primary">Change Mode</button>
           </p>

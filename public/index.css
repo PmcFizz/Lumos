@@ -169,6 +169,7 @@ body,
   font-size: 38px;
   padding: 12px;
   border-bottom: 1px solid #ddd;
+  padding-top: 0;
 }
 
 .visibility-hidden {
