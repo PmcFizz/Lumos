@@ -242,14 +242,10 @@
 
   async function setBrightness() {
     try {
+      const brightnessValue = document.querySelector("#led-brightness").value;
       const data = await sendData("/set-led-brightness", { brightnessValue }); // Assuming empty object if no data is needed
       if (data && data.success) {
         console.log("操作成功");
-        if (brightnessValue == 10) {
-          brightnessValue = 255;
-        } else {
-          brightnessValue = 10;
-        }
       }
     } catch (error) {
       console.error("Error in setAllOn:", error);
@@ -269,7 +265,6 @@
     }
   }
 
-  let open = true;
   async function groupSetLed() {
     const open = document.querySelector("#open-led-num").value;
     const close = document.querySelector("#close-led-num").value;
@@ -280,7 +275,6 @@
       });
       if (data && data.success) {
         console.log("操作成功");
-        open = !open;
       }
       queryLedStatus();
     } catch (error) {
@@ -291,10 +285,10 @@
   async function scheduleSetLed() {
     try {
       const scheduleTime = document.querySelector("#schedule-time").value;
-      const open = document.querySelector("#open-led-num").value;
-      const close = document.querySelector("#close-led-num").value;
-      // const now = new Date().getTime();
-      // const dateStr = new Date(now + 60 * 1000);
+      let open = document.querySelector("#open-led-num").value;
+      let close = document.querySelector("#close-led-num").value;
+      open = open.split(",");
+      close = close.split(",");
       const data = await sendData("/schedule", {
         dateStr: scheduleTime,
         taskData: {
@@ -303,7 +297,7 @@
         },
       });
       if (data && data.success) {
-        window.alert(`1分钟后开启1，2，3灯，关闭4，5，6`);
+        window.alert(`在时间${scheduleTime}，开启${open}灯，关闭${close}`);
         console.log("操作成功");
       }
       queryLedStatus();
@@ -353,15 +347,16 @@
   }
 
   function initRGBBtnClick() {
-    console.log(121);
     document.querySelectorAll(".rgb-btn").forEach((button) => {
       button.addEventListener("click", function (event) {
         const ledNo = event.target.dataset.ledno;
 
         clickRBGNum = ledNo;
         var floatingDiv = document.getElementById("floatingDiv");
-        this.appendChild(floatingDiv);
-        floatingDiv.style.display = "block"; // 显示悬浮 div
+        var cloneEl = floatingDiv.cloneNode(true);
+        cloneEl.style.display = "block";
+        this.appendChild(cloneEl);
+        // floatingDiv.style.display = "block"; // 显示悬浮 div
       });
     });
   }
