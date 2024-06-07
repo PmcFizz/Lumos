@@ -158,6 +158,7 @@
   function setHtml(data) {
     const arr = parseRegisterValuesToLightStates(data);
     const lHtml = [];
+    // TODO 如果已经有了dom，则不需要再生成dom，只需要使用序号来更新状态
     arr.forEach((x, i) => {
       const { state } = x;
       const styleClass = `btn ${
@@ -176,6 +177,7 @@
   function setRGBHtml(data) {
     const arr = parseRGBRegisterToHex(data);
     const lHtml = [];
+    // TODO 如果已经有了dom，则不需要再生成dom，只需要使用序号来更新状态
     arr.forEach((x, i) => {
       const ledNo = i + 1;
       lHtml.push(`
