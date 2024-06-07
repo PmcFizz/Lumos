@@ -252,7 +252,23 @@
     }
   }
 
-  // TODO 设置整体颜色
+  // 设置整体颜色
+  global.changeAllColor = async function (color) {
+    const newRegistersValues = updateRegisterValues(registersValues, color);
+    try {
+      const data = await sendData("/writeRegisters", {
+        dataAddress: 10,
+        values: newRegistersValues,
+      });
+      if (data && data.success) {
+        console.log("操作成功");
+        queryLedStatus();
+      }
+    } catch (error) {
+      console.error("Error in setAllOn:", error);
+    }
+  };
+
   async function setColor() {
     try {
       const data = await sendData("/set-led-color", { colorValue: "" });
@@ -374,8 +390,8 @@
   global.changeColor = async function (color) {
     const newRegistersValues = updateRegisterValues(
       registersValues,
-      clickRBGNum,
-      color
+      color,
+      clickRBGNum
     );
     try {
       const data = await sendData("/writeRegisters", {

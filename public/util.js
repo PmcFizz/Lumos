@@ -109,11 +109,11 @@
   /**
    * 根据颜色索引和一个新的颜色，获取寄存器的值
    * @param {*} registers 所有寄存器的值
-   * @param {*} globalColorIndex 全局的颜色索引，1起
    * @param {*} hexColor 新颜色 16进制
+   * @param {*} globalColorIndex 全局的灯珠，1起,如果没有则修改全部
    * @returns
    */
-  global.updateRegisterValues = (registers, globalColorIndex, hexColor) => {
+  global.updateRegisterValues = (registers, hexColor, globalColorIndex) => {
     // 将16进制RGB颜色转换为二进制字符串，然后只取RGB相应的位
     const red = parseInt(hexColor.substring(0, 2), 16) > 0 ? "1" : "0";
     const green = parseInt(hexColor.substring(2, 4), 16) > 0 ? "1" : "0";
@@ -121,6 +121,19 @@
 
     // 需要从高到低拼接
     const newColorBinary = green + red + blue;
+
+    // 如果没有传入灯珠序号，则修改全部灯珠颜色为hexColor
+    if (globalColorIndex === undefined) {
+      // 如果没有提供颜色索引，则更新所有寄存器的颜色
+      return registers.map((register) => {
+        let binaryString = register.toString(2).padStart(16, "0");
+        let updatedBinary = binaryString
+          .split("")
+          .map((bit, idx) => (idx < 15 ? newColorBinary[idx % 3] : bit))
+          .join("");
+        return parseInt(updatedBinary, 2).toString(10);
+      });
+    }
 
     // 计算在哪个寄存器及该寄存器内的索引位置，索引从1开始计数
     let registerIndex = Math.floor((globalColorIndex - 1) / 5);
