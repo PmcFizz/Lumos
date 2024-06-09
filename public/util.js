@@ -119,18 +119,17 @@
     const green = parseInt(hexColor.substring(2, 4), 16) > 0 ? "1" : "0";
     const blue = parseInt(hexColor.substring(4, 6), 16) > 0 ? "1" : "0";
 
-    // 需要从高到低拼接
+    // 需要从高到低拼接 brg
     const newColorBinary = green + red + blue;
 
     // 如果没有传入灯珠序号，则修改全部灯珠颜色为hexColor
     if (globalColorIndex === undefined) {
       // 如果没有提供颜色索引，则更新所有寄存器的颜色
+
       return registers.map((register) => {
-        let binaryString = register.toString(2).padStart(16, "0");
-        let updatedBinary = binaryString
-          .split("")
-          .map((bit, idx) => (idx < 15 ? newColorBinary[idx % 3] : bit))
-          .join("");
+        // 构建全新的寄存器值，每个颜色3位，5个颜色共15位
+        let updatedBinary = newColorBinary.repeat(5);
+        // 可能需要在高位补充一个未使用的位
         return parseInt(updatedBinary, 2).toString(10);
       });
     }
@@ -189,5 +188,31 @@
     } else {
       return "white"; // 暗背景，用白色文字
     }
+  };
+
+  /**
+   *
+   * @returns
+   */
+  global.addTwoMinutesAndFormat = () => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 2); // 加2分钟
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const day = now.getDate();
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+    const second = now.getSeconds();
+
+    // 将月、日、时、分、秒格式化为两位数
+    const formattedMonth = month < 10 ? `0${month}` : month;
+    const formattedDay = day < 10 ? `0${day}` : day;
+    const formattedHour = hour < 10 ? `0${hour}` : hour;
+    const formattedMinute = minute < 10 ? `0${minute}` : minute;
+    const formattedSecond = second < 10 ? `0${second}` : second;
+
+    // 格式化为YYYY-MM-DD HH:mm
+    // 格式化为YYYY-MM-DD HH:mm:ss
+    return `${year}-${formattedMonth}-${formattedDay} ${formattedHour}:${formattedMinute}:${formattedSecond}`;
   };
 })(window);

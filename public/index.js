@@ -30,10 +30,13 @@
   queryBtn.addEventListener("click", queryLedStatus);
 
   setBrightnessBtn.addEventListener("click", setBrightness);
-  setColorBtn.addEventListener("click", setColor);
+  // setColorBtn.addEventListener("click", setColor);
   groupSetBtn.addEventListener("click", groupSetLed);
   scheduleSetBtn.addEventListener("click", scheduleSetLed);
   changeModeBtn.addEventListener("click", changeMode);
+
+  const afterTwoMTime = addTwoMinutesAndFormat();
+  document.querySelector("#schedule-time").value = afterTwoMTime;
 
   document
     .getElementById("modbusForm")
