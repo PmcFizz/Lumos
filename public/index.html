@@ -15,22 +15,22 @@
     <div class="row h-full">
       <h3 class="app-title">Lumos</h3>
       <div class="col-3 h-full">
-        <h4>Configure Device</h4>
+        <h4 data-i18n="configureDevice">Configure Device</h4>
         <form id="modbusForm">
           <div class="form-group mb-1">
-            <label for="deviceName" class="col-form-label-sm mb-0">Device Name:</label>
+            <label for="deviceName" class="col-form-label-sm mb-0" data-i18n="deviceName">Device Name:</label>
             <input type="text" class="form-control form-control-sm" value="fizz" id="deviceName" required>
           </div>
           <div class="form-group mb-1">
-            <label for="serialPort" class="col-form-label-sm mb-0">Serial Port:</label>
+            <label for="serialPort" class="col-form-label-sm mb-0" data-i18n="serialPort">Serial Port:</label>
             <input type="text" class="form-control form-control-sm" id="serialPort" required>
           </div>
           <div class="form-group mb-1">
-            <label for="modbusId" class="col-form-label-sm mb-0">Modbus ID:</label>
+            <label for="modbusId" class="col-form-label-sm mb-0" data-i18n="modbusID">Modbus ID:</label>
             <input type="number" class="form-control form-control-sm" value="1" id="modbusId" required>
           </div>
           <div class="form-group mb-1">
-            <label for="baudRate" class="col-form-label-sm mb-0">Baud Rate:</label>
+            <label for="baudRate" class="col-form-label-sm mb-0" data-i18n="baudRate">Baud Rate:</label>
             <input type="number" class="form-control form-control-sm" value=9600 id="baudRate" required>
           </div>
           <div class="form-group mb-1 hide">
@@ -38,27 +38,31 @@
             <input type="number" class="form-control form-control-sm" value="6" id="period" required>
           </div>
           <p class="mb-1">
-            <button type="submit" class="btn btn-primary btn-sm mb-1">Connection</button>
-            <button type="button" id="query-btn" class="btn btn-sm btn-primary mb-1">Query Led Status</button>
+            <button type="submit" class="btn btn-primary btn-sm mb-1" data-i18n="connection">Connection</button>
+            <button type="button" id="query-btn" class="btn btn-sm btn-primary mb-1" data-i18n="queryLedStatus">Query
+              Led Status</button>
           </p>
           <p class="mb-1">
-            <button type="button" id="all-on-btn" class="btn btn-sm btn-primary">All On</button>
-            <button type="button" id="all-off-btn" class="btn btn-sm btn-primary">All Off</button>
+            <button type="button" id="all-on-btn" class="btn btn-sm btn-primary" data-i18n="allOn">All On</button>
+            <button type="button" id="all-off-btn" class="btn btn-sm btn-primary" data-i18n="allOff">All Off</button>
           </p>
           <p class="mb-1">
-            <button type="button" id="start-loop-btn" class="btn btn-sm btn-primary">Start Loop</button>
-            <button type="button" id="stop-loop-btn" class="btn btn-sm btn-primary">Stop Loop</button>
+            <button type="button" id="start-loop-btn" class="btn btn-sm btn-primary" data-i18n="startLoop">Start
+              Loop</button>
+            <button type="button" id="stop-loop-btn" class="btn btn-sm btn-primary" data-i18n="stopLoop">Stop
+              Loop</button>
           </p>
           <div class="mb-1 pt-1 pb-1 border-top border-bottom">
 
             <div class="form-group mb-1">
-              <label for="led-brightness" class="col-form-label-sm mb-0">Led Brightness:</label>
+              <label for="led-brightness" class="col-form-label-sm mb-0" data-i18n="ledBrightness">Led
+                Brightness:</label>
               <input type="range" min="0" max="255" class="form-control-range" id="led-brightness">
             </div>
 
             <!--led color-->
             <div class="form-group mb-1">
-              <label for="led-brightness" class="col-form-label-sm mb-0">Led Color:</label>
+              <label for="led-brightness" class="col-form-label-sm mb-0" data-i18n="ledColor">Led Color:</label>
 
               <div>
                 <div class="change-color-container">
@@ -74,45 +78,56 @@
               </div>
             </div>
 
-            <button type="button" id="set-brightness-btn" class="btn btn-sm btn-primary">Set Brightness</button>
+            <button type="button" id="set-brightness-btn" class="btn btn-sm btn-primary" data-i18n="setBrightness">Set
+              Brightness</button>
             <!-- <button type="button" id="set-color-btn" class="btn btn-sm btn-primary">Set Color</button> -->
           </div>
           <div class="mb-1 pb-1 border-top border-bottom">
 
             <div class="form-group mb-1">
-              <label for="open-led-num" class="col-form-label-sm mb-0">Open Led:</label>
+              <label for="open-led-num" class="col-form-label-sm mb-0" data-i18n="openLed">Open Led:</label>
               <input type="text" class="form-control form-control-sm" value="4,5,6" id="open-led-num">
             </div>
             <div class="form-group mb-1">
-              <label for="close-led-num" class="col-form-label-sm mb-0">Close Led:</label>
+              <label for="close-led-num" class="col-form-label-sm mb-0" data-i18n="closeLed">Close Led:</label>
               <input type="text" class="form-control form-control-sm" value="1,2,3" id="close-led-num">
             </div>
             <div class="form-group mb-1">
-              <label for="schedule-time" class="col-form-label-sm mb-0">Schedule Time:</label>
+              <label for="schedule-time" class="col-form-label-sm mb-0" data-i18n="scheduleTime">Schedule Time:</label>
               <input type="text" class="form-control form-control-sm" placeholder="YYYY-MM-DD HH:dd:ss"
                 id="schedule-time">
             </div>
 
-            <button type="button" id="group-set-btn" class="btn btn-sm btn-primary">Group Set</button>
-            <button type="button" id="schedule-set-btn" class="btn btn-sm btn-primary">Schedule Set</button>
+            <button type="button" id="group-set-btn" class="btn btn-sm btn-primary" data-i18n="groupSet">Group
+              Set</button>
+            <button type="button" id="schedule-set-btn" class="btn btn-sm btn-primary" data-i18n="scheduleSet">Schedule
+              Set</button>
           </div>
           <p class="mb-1">
-            <button type="button" id="change-mode-btn" class="btn btn-sm btn-primary">Change Mode</button>
+            <button type="button" id="change-mode-btn" class="btn btn-sm btn-primary" data-i18n="changeMode">Change
+              Mode</button>
           </p>
         </form>
 
       </div>
       <div class="col-9 px-4 border-left">
 
-        <h4>Base Info</h4>
+        <h4 data-i18n="baseInfo">Base Info</h4>
         <div class="row pb-2 border-bottom">
-          <div class="col-3">ID: <span id="config_modbusId">——</span></div>
-          <div class="col-3">Status: <span id="config_status">OFF</span></div>
-          <div class="col-3">Baud Rate : <span id="config_baudRate">——</span></div>
-          <div class="col-3">Work Mode: <span id="config_workMode">——</span></div>
-          <div class="col-3">Brightness: <span id="config_brightness">——</span></div>
-          <div class="col-3">Effective Bit: <span id="config_effectiveBit">——</span></div>
-          <div class="col-3">Output Circuits: <span id="config_outputCircuits">——</span></div>
+          <div class="col-3"><span data-i18n="id">ID: </span><span id="config_modbusId">——</span></div>
+          <div class="col-3"><span data-i18n="status">Status: </span><span id="config_status">OFF</span></div>
+          <div class="col-3"><span data-i18n="baudRate">Baud Rate : </span><span id="config_baudRate">——</span></div>
+          <div class="col-3"><span data-i18n="workMode">Work Mode: </span><span id="config_workMode">——</span></div>
+          <div class="col-3"><span data-i18n="brightness">Brightness: </span><span id="config_brightness">——</span>
+          </div>
+          <div class="col-3">
+            <span data-i18n="effectiveBit">Effective Bit: </span>
+            <span id="config_effectiveBit">——</span>
+          </div>
+          <div class="col-3">
+            <span data-i18n="outputCircuits">Output Circuits: </span>
+            <span id="config_outputCircuits">——</span>
+          </div>
         </div>
         <div class="row pt-2" id="led-container">
           <!-- <button type="button" class="btn btn-sm rgb-btn" style="background-color: red;">01 </button>
@@ -141,8 +156,10 @@
 
   </div>
 
+  <script src="./i18next.min.js"></script>
   <script src="./util.js"></script>
   <script src="./index.js"></script>
+  <script src="./translate.js"></script>
 
 </body>
 
