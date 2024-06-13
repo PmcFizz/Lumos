@@ -17,29 +17,29 @@
       <div class="col-3 h-full">
         <h4 data-i18n="configureDevice">Configure Device</h4>
         <form id="modbusForm">
-          <div class="form-group mb-1">
-            <label for="deviceName" class="col-form-label-sm mb-0" data-i18n="deviceName">Device Name:</label>
-            <input type="text" class="form-control form-control-sm" value="fizz" id="deviceName" required>
+          <div class="form-group mb-1 row pr-15">
+            <label for="deviceName" class="col-form-label-sm mb-0 col-sm-5" data-i18n="deviceName">Device Name:</label>
+            <input type="text" class="form-control form-control-sm col-sm-7" value="fizz" id="deviceName" required>
           </div>
-          <div class="form-group mb-1">
-            <label for="serialPort" class="col-form-label-sm mb-0" data-i18n="serialPort">Serial Port:</label>
-            <input type="text" class="form-control form-control-sm" id="serialPort" required>
+          <div class="form-group mb-1 row pr-15">
+            <label for="serialPort" class="col-form-label-sm mb-0 col-sm-5" data-i18n="serialPort">Serial Port:</label>
+            <input type="text" class="form-control form-control-sm col-sm-7" id="serialPort" required>
           </div>
-          <div class="form-group mb-1">
-            <label for="modbusId" class="col-form-label-sm mb-0" data-i18n="modbusID">Modbus ID:</label>
-            <input type="number" class="form-control form-control-sm" value="1" id="modbusId" required>
+          <div class="form-group mb-1 row pr-15">
+            <label for="modbusId" class="col-form-label-sm mb-0 col-sm-5" data-i18n="modbusID">Modbus ID:</label>
+            <input type="number" class="form-control form-control-sm col-sm-7" value="1" id="modbusId" required>
           </div>
-          <div class="form-group mb-1">
-            <label for="baudRate" class="col-form-label-sm mb-0" data-i18n="baudRate">Baud Rate:</label>
-            <input type="number" class="form-control form-control-sm" value=9600 id="baudRate" required>
+          <div class="form-group mb-1 row pr-15">
+            <label for="baudRate" class="col-form-label-sm mb-0 col-sm-5" data-i18n="baudRate">Baud Rate:</label>
+            <input type="number" class="form-control form-control-sm col-sm-7" value=9600 id="baudRate" required>
           </div>
           <div class="form-group mb-1 hide">
             <label for="period" class="col-form-label-sm mb-0">Period(s):</label>
             <input type="number" class="form-control form-control-sm" value="6" id="period" required>
           </div>
           <p class="mb-1">
-            <button type="submit" class="btn btn-primary btn-sm mb-1" data-i18n="connection">Connection</button>
-            <button type="button" id="query-btn" class="btn btn-sm btn-primary mb-1" data-i18n="queryLedStatus">Query
+            <button type="submit" class="btn btn-primary btn-sm" data-i18n="connection">Connection</button>
+            <button type="button" id="query-btn" class="btn btn-sm btn-primary" data-i18n="queryLedStatus">Query
               Led Status</button>
           </p>
           <p class="mb-1">
@@ -55,8 +55,9 @@
           <div class="mb-1 pt-1 pb-1 border-top border-bottom">
 
             <div class="form-group mb-1">
-              <label for="led-brightness" class="col-form-label-sm mb-0" data-i18n="ledBrightness">Led
-                Brightness:</label>
+              <label for="led-brightness" class="col-form-label-sm mb-0" data-i18n="ledBrightness">
+                Led Brightness:
+              </label>
               <input type="range" min="0" max="255" class="form-control-range" id="led-brightness">
             </div>
 
@@ -78,8 +79,8 @@
               </div>
             </div>
 
-            <button type="button" id="set-brightness-btn" class="btn btn-sm btn-primary" data-i18n="setBrightness">Set
-              Brightness</button>
+            <!-- <button type="button" id="set-brightness-btn" class="btn btn-sm btn-primary" data-i18n="setBrightness">Set
+              Brightness</button> -->
             <!-- <button type="button" id="set-color-btn" class="btn btn-sm btn-primary">Set Color</button> -->
           </div>
           <div class="mb-1 pb-1 border-top border-bottom">
@@ -110,12 +111,15 @@
         </form>
 
       </div>
-      <div class="col-9 px-4 border-left">
+      <div class="col-9 px-4 border-left flex flex-col main-content">
 
         <h4 data-i18n="baseInfo">Base Info</h4>
         <div class="row pb-2 border-bottom">
           <div class="col-3"><span data-i18n="id">ID: </span><span id="config_modbusId">——</span></div>
-          <div class="col-3"><span data-i18n="status">Status: </span><span id="config_status">OFF</span></div>
+          <div class="col-3"><span data-i18n="status">Status: </span>
+            <!-- <span id="config_status" class="off"></span> -->
+            <span id="config_status">OFF</span>
+          </div>
           <div class="col-3"><span data-i18n="baudRate">Baud Rate : </span><span id="config_baudRate">——</span></div>
           <div class="col-3"><span data-i18n="workMode">Work Mode: </span><span id="config_workMode">——</span></div>
           <div class="col-3"><span data-i18n="brightness">Brightness: </span><span id="config_brightness">——</span>

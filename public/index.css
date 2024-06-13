@@ -57,6 +57,14 @@ body,
   height: 100%;
 }
 
+.pr-15 {
+  padding-right: 15px;
+}
+
+.main-content {
+  height: calc(100vh - 120px);
+}
+
 #led-container button {
   margin-right: 4px;
   margin-bottom: 4px;
@@ -66,12 +74,16 @@ body,
 #led-container {
   display: flex;
   justify-content: center;
-  max-height: 500px;
+  /* max-height: 500px; */
   overflow-y: auto;
+  /* flex-grow: 1; */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 #rgb-led-container {
-  max-height: 500px;
+  overflow-y: auto;
+  /* flex-grow: 1; */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   /* overflow-y: auto; */
 }
 
@@ -179,3 +191,25 @@ body,
 .relative {
   position: relative;
 }
+
+.flex {
+  display: flex;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+#config_status.off {
+  display: inline-block;
+  height: 12px;
+  width: 12px;
+  border-radius: 100%;
+  background-color: #28a745;
+}
+
+#config_status.off {}

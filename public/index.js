@@ -12,7 +12,7 @@
   const startLoopBtn = document.querySelector("#start-loop-btn");
   const stopLoopBtn = document.querySelector("#stop-loop-btn");
   const queryBtn = document.querySelector("#query-btn");
-  const setBrightnessBtn = document.querySelector("#set-brightness-btn");
+  const setBrightnessInput = document.querySelector("#led-brightness");
   const setColorBtn = document.querySelector("#set-color-btn");
   const groupSetBtn = document.querySelector("#group-set-btn");
   const scheduleSetBtn = document.querySelector("#schedule-set-btn");
@@ -29,7 +29,7 @@
 
   queryBtn.addEventListener("click", queryLedStatus);
 
-  setBrightnessBtn.addEventListener("click", setBrightness);
+  setBrightnessInput.addEventListener("change", setBrightness);
   // setColorBtn.addEventListener("click", setColor);
   groupSetBtn.addEventListener("click", groupSetLed);
   scheduleSetBtn.addEventListener("click", scheduleSetLed);
@@ -251,6 +251,7 @@
       const data = await sendData("/set-led-brightness", { brightnessValue }); // Assuming empty object if no data is needed
       if (data && data.success) {
         console.log("操作成功");
+        checkStatus();
       }
     } catch (error) {
       console.error("Error in setAllOn:", error);
