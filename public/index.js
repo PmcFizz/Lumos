@@ -75,7 +75,9 @@
         9: "config_outputCircuits",
       };
       data.data.configData[1] = data.data.configData[1] * 100;
-      document.querySelector(`#config_status`).innerText = data.data.status;
+      document.querySelector(
+        `#config_status`
+      ).outerHTML = `<span id="config_status" class="on"></span>`;
       for (const [key, value] of Object.entries(indexDomMap)) {
         document.querySelector(`#${value}`).innerText =
           data.data.configData[key];
@@ -438,9 +440,15 @@
     try {
       const data = await sendData("/checkStatus");
       if (data && data.success) {
-        document.querySelector(`#config_status`).innerText = data.data
-          ? "ON"
-          : "OFF";
+        if (data.data === "ON") {
+          document.querySelector(
+            `#config_status`
+          ).outerHTML = `<span id="config_status" class="on"></span>`;
+        } else {
+          document.querySelector(
+            `#config_status`
+          ).outerHTML = `<span id="config_status"></span>`;
+        }
         if (data.data) {
           connectDevices();
         }
