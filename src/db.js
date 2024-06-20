@@ -17,9 +17,19 @@ const getDeviceRegister = async () => {
   return await db.getData("/deviceRegister");
 };
 
+const saveScheduleJob = async (jobData) => {
+  await db.push("/scheduleJob", jobData);
+};
+
+const queryScheduleJob = async (jobData) => {
+  await db.getData("/scheduleJob");
+};
+
 module.exports = {
   saveDevice,
   saveDeviceConfig,
   saveDeviceRegister,
   getDeviceRegister,
+  saveScheduleJob,
+  queryScheduleJob,
 };

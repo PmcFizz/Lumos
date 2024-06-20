@@ -109,7 +109,7 @@ function simulate() {
 }
 
 // 添加定时任务的路由
-server.post("/schedule", (req, res) => {
+server.post("/schedule", async (req, res) => {
   const { dateStr, taskData } = req.body;
   // 使用node-schedule计划一个任务
   const date = new Date(dateStr);
@@ -128,12 +128,25 @@ server.post("/schedule", (req, res) => {
         console.error(error);
       });
   });
+  const jobId = uuid();
+  await saveScheduleJob({ id: jobId, date, taskData });
+
   res.json({
     success: true,
     data: {
       dateStr,
       taskData,
     },
+  });
+});
+
+// 查询一个设备上所有灯的状态，传入设备id；
+server.post("/query-job-data", async (req, res) => {
+  const jobList = await queryScheduleJob();
+  res.json({
+    success: true,
+    data: jobList,
+    msg: `query job data success`,
   });
 });
 
