@@ -19,6 +19,8 @@ const {
   saveDeviceConfig,
   saveDeviceRegister,
   getDeviceRegister,
+  saveScheduleJob,
+  queryScheduleJob,
 } = require("./db");
 const client = new ModbusRTU();
 const server = express();

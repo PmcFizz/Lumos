@@ -18,11 +18,11 @@ const getDeviceRegister = async () => {
 };
 
 const saveScheduleJob = async (jobData) => {
-  await db.push("/scheduleJob", jobData);
+  await db.push("/scheduleJob[]", jobData);
 };
 
 const queryScheduleJob = async (jobData) => {
-  await db.getData("/scheduleJob");
+  return await db.getData("/scheduleJob");
 };
 
 module.exports = {
