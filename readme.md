@@ -159,10 +159,7 @@ html
 考虑使用库：虽然上述方法可以实现基本的国际化，但它相对简单且可能不适用于复杂的场景。对于更复杂的项目，考虑使用专门的 i18n 库或框架，如 i18next、polyglot.js 等，它们提供了更强大和灵活的功能。
 服务器端渲染：如果你的应用使用服务器端渲染（SSR），你也可以在服务器端处理国际化，根据用户的语言偏好生成相应的 HTML 内容。这通常涉及到使用模板引擎和 i18n 库来动态生成和翻译页面内容。
 
-
-
 ## 持久化 定时任务
-
 
 是的，`node-schedule`库在默认情况下将所有定时任务存储在应用的内存中。这意味着如果你的应用程序重启，所有的定时任务将会丢失，因为它们仅仅是在运行时内存中维护。要解决这个问题，你需要实现一种机制来持久化这些任务并在应用程序启动时重新加载它们。
 
@@ -172,12 +169,12 @@ html
 
 2. **应用启动时重新加载任务**：在应用启动时，从数据库读取所有预定的任务，并使用`node-schedule`重新安排它们。
 
-以下是示例代码，演示如何在Express应用中实现这一机制：
+以下是示例代码，演示如何在 Express 应用中实现这一机制：
 
 ```javascript
 const express = require("express");
 const bodyParser = require("body-parser");
-const schedule = require('node-schedule');
+const schedule = require("node-schedule");
 const { JsonDB, Config } = require("node-json-db");
 
 const db = new JsonDB(new Config("fizzDataBase", true, false, "/"));
@@ -188,43 +185,45 @@ server.use(bodyParser.json());
 
 // 从数据库加载并恢复定时任务
 function loadAndScheduleJobs() {
-    try {
-        const allTasks = db.getData("/");
-        for (let taskKey in allTasks) {
-            const task = allTasks[taskKey];
-            schedule.scheduleJob(new Date(task.date), function() {
-                console.log(`Executing task: ${task.description}`);
-                // 实现具体任务逻辑
-            });
-            console.log(`Task ${taskKey} rescheduled for ${task.date}`);
-        }
-    } catch (error) {
-        console.error("Failed to load tasks from DB", error);
+  try {
+    const allTasks = db.getData("/");
+    for (let taskKey in allTasks) {
+      const task = allTasks[taskKey];
+      schedule.scheduleJob(new Date(task.date), function () {
+        console.log(`Executing task: ${task.description}`);
+        // 实现具体任务逻辑
+      });
+      console.log(`Task ${taskKey} rescheduled for ${task.date}`);
     }
+  } catch (error) {
+    console.error("Failed to load tasks from DB", error);
+  }
 }
 
 // 添加定时任务的路由
-server.post('/schedule', (req, res) => {
-    const { date, task } = req.body;
-    const taskId = `task_${new Date(date).getTime()}`;  // 创建一个基于时间戳的任务ID
-    const taskData = { date, description: task };
+server.post("/schedule", (req, res) => {
+  const { date, task } = req.body;
+  const taskId = `task_${new Date(date).getTime()}`; // 创建一个基于时间戳的任务ID
+  const taskData = { date, description: task };
 
-    // 将任务保存到数据库
-    db.push(`/${taskId}`, taskData);
+  // 将任务保存到数据库
+  db.push(`/${taskId}`, taskData);
 
-    // 计划任务
-    schedule.scheduleJob(new Date(date), function() {
-        console.log(`Executing task: ${task}`);
-        db.delete(`/${taskId}`);  // 任务完成后可以选择删除
-    });
+  // 计划任务
+  schedule.scheduleJob(new Date(date), function () {
+    console.log(`Executing task: ${task}`);
+    db.delete(`/${taskId}`); // 任务完成后可以选择删除
+  });
 
-    res.send(`Task scheduled with ID: ${taskId}`);
+  res.send(`Task scheduled with ID: ${taskId}`);
 });
 
 server.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-    loadAndScheduleJobs(); // 启动服务器时加载任务
+  console.log(`Server running at http://localhost:${port}`);
+  loadAndScheduleJobs(); // 启动服务器时加载任务
 });
 ```
 
-在这个示例中，每个任务在被计划时都被保存到一个JSON数据库中，并且在服务器启动时被重新加载和安排。这个实现只是一个基本的例子，你可能需要根据实际的应用需求调整错误处理、任务存储结构以及任务恢复逻辑。在生产环境中，使用一个更健壮的数据库系统（如MongoDB, PostgreSQL等）来管理这些数据可能是更好的选择。
+在这个示例中，每个任务在被计划时都被保存到一个 JSON 数据库中，并且在服务器启动时被重新加载和安排。这个实现只是一个基本的例子，你可能需要根据实际的应用需求调整错误处理、任务存储结构以及任务恢复逻辑。在生产环境中，使用一个更健壮的数据库系统（如 MongoDB, PostgreSQL 等）来管理这些数据可能是更好的选择。
+
+`asar extract .\dist\win-unpacked\resources\app.asar .\fizz\`
