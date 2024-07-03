@@ -10,6 +10,14 @@
   <input type="text" id="commandInput" placeholder="Enter command">
   <button id="sendButton">Send Command</button>
 
+  <button onclick="setDirection('up')">Up</button>
+  <button onclick="setDirection('down')">Down</button>
+  <button onclick="setDirection('left')">Left</button>
+  <button onclick="setDirection('right')">Right</button>
+  <button onclick="setDirection('reset')">Reset</button>
+  <button onclick="setDirection('pause')">Pause</button>
+  <button onclick="setDirection('resume')">Resume</button>
+
   <script>
 
     // WebSocket Setup
@@ -36,6 +44,11 @@
       var command = document.getElementById('commandInput').value;
       socket.send(command);
     });
+
+    function setDirection(command) {
+      socket.send(command);
+    }
+
   </script>
 </body>
 

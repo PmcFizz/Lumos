@@ -46,11 +46,12 @@ wss.on("connection", (ws) => {
   // 监听来自客户端的消息
   ws.on("message", (message) => {
     console.log(`Received: ${message}`);
+    const textMessage = message.toString(); // 这里假设`message`是Buffer或其他类型
 
     // 可以在这里处理消息，或将其广播给所有客户端
     wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
-        client.send(message);
+        client.send(textMessage);
       }
     });
   });
