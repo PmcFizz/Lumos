@@ -2,6 +2,8 @@
  * 不用费劲巴拉地破解了，我准备开源啦。
  */
 const express = require("express");
+const http = require("http");
+const WebSocket = require("ws");
 const bodyParser = require("body-parser");
 const ModbusRTU = require("modbus-serial");
 const path = require("path");
@@ -31,6 +33,36 @@ server.use(morgan("dev"));
 server.use(bodyParser.json()); // 支持 JSON 编码的请求体
 
 server.use(express.static(path.join(basePath, "../", "public")));
+
+// 创建一个HTTP服务器
+const wsserver = http.createServer(server);
+
+// 创建WebSocket服务器并绑定到HTTP服务器
+const wss = new WebSocket.Server({ server: wsserver });
+
+wss.on("connection", (ws) => {
+  console.log("Client connected");
+
+  // 监听来自客户端的消息
+  ws.on("message", (message) => {
+    console.log(`Received: ${message}`);
+
+    // 可以在这里处理消息，或将其广播给所有客户端
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  });
+
+  ws.on("close", () => {
+    console.log("Client disconnected");
+  });
+
+  ws.on("error", (error) => {
+    console.log("WebSocket error: " + error);
+  });
+});
 
 // server.use(express.static("public")); // 设置静态文件目录
 let registerNum = 20;
@@ -506,6 +538,6 @@ server.post("/groupLed", async (req, res) => {
     });
 });
 
-server.listen(port, () => {
+wsserver.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });

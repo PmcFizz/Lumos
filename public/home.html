@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>WebSocket Controlled Canvas</title>
+</head>
+
+<body>
+  <input type="text" id="commandInput" placeholder="Enter command">
+  <button id="sendButton">Send Command</button>
+
+  <script>
+
+    // WebSocket Setup
+    var socket = new WebSocket('ws://localhost:666'); // 替换为实际的WebSocket URL
+
+    socket.onopen = function (event) {
+      console.log('WebSocket is connected.');
+    };
+
+    socket.onmessage = function (event) {
+      var message = event.data;
+      console.log(message)
+    };
+
+    socket.onclose = function (event) {
+      console.log('WebSocket is closed.');
+    };
+
+    socket.onerror = function (error) {
+      console.log('WebSocket error: ' + error);
+    };
+
+    document.getElementById('sendButton').addEventListener('click', function () {
+      var command = document.getElementById('commandInput').value;
+      socket.send(command);
+    });
+  </script>
+</body>
+
+</html>
