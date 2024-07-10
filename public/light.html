@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<style type="text/css">
+  html,
+  body {
+    height: 100vh;
+  }
+
+  body {
+    padding: 20px;
+  }
+
+  .ml-40 {
+    margin-left: 40px;
+  }
+
+  .w-400 {
+    width: 400px;
+  }
+
+  .w-200 {
+    width: 200px;
+  }
+
+  .flex-center {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  button {
+    padding: 4px 8px;
+  }
+
+  input {
+    line-height: 25px;
+    height: 25px;
+    outline: none;
+    padding-left: 4px;
+  }
+
+  .light-container {
+    width: 700px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    min-height: 435px;
+    margin-left: 30px;
+    padding: 8px;
+  }
+
+  .log-container {
+    padding: 8px;
+    margin-top: 12px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    width: 600px;
+    min-height: 300px;
+    max-height: 500px;
+    overflow-y: auto;
+    font-size: 12px;
+    counter-reset: log-entry-counter;
+  }
+
+  .log-item {
+    line-height: 24px;
+  }
+
+  .log-item::before {
+    counter-increment: log-entry-counter;
+    content: counter(log-entry-counter) ". ";
+    width: 24px;
+    display: inline-block;
+  }
+
+  .log-item.write {
+    color: #bc3433;
+  }
+
+  .log-item.read {
+    color: #107010;
+  }
+
+  input[type="checkbox"] {
+    height: 12px;
+  }
+
+  .float-left {
+    float: left;
+  }
+
+  .ml-32 {
+    margin-left: 32px;
+  }
+
+  .w-600 {
+    width: 600px;
+  }
+
+  .light-item {
+    margin: 4px;
+  }
+</style>
+
+<body>
+  <div class="float-left w-600">
+    <button id="connect">连接串行端口</button>
+    <button id="disconnect" class="must-connect-btn" disabled>断开连接</button>
+    <p>
+      <input id="stationNo" type="text" placeholder="设备站号" />
+      <input id="register" type="text" placeholder="设备寄存器" />
+      <!-- <button class="dir-btn must-connect-btn" onclick="startCollect()">开始采集</button> -->
+      <button class="dir-btn" onclick="startCollect()">开始采集</button>
+    </p>
+
+    <input id="dataToSend" class="w-400" value="01 03 00 00 00 14 45 C5" type="text" placeholder="输入要发送的数据" />
+    <button class="must-connect-btn" id="send" disabled>发送数据</button>
+    <button id="clearLog">清空日志</button>
+
+    <div class="log-container" id="log"></div>
+  </div>
+  <div class="float-left light-container" id="light-container">
+
+  </div>
+
+
+  <script>
+    //TODO 解析返回报文
+    //TODO 灯的状态回显
+    //TODO 点亮单灯，点亮批量灯
+    //TODO 将输入文本，转译发送
+    const connectButton = document.getElementById('connect');
+    const disconnectButton = document.getElementById('disconnect');
+    const sendButton = document.getElementById('send');
+    const dataToSend = document.getElementById('dataToSend');
+    const logElement = document.getElementById('log');
+    const directionBtn = document.querySelectorAll('.dir-btn')
+    const clearLogBtn = document.querySelector('#clearLog')
+    const lightContainer = document.querySelector("#light-container")
+
+    let port;
+    let reader;
+    let writer;
+
+    function generateLight(register) {
+      const lightNum = register * 16
+      const lightElArr = []
+      for (let i = 0; i < lightNum; i++) {
+        lightElArr.push(`<button class="light-item" data-num="${i}">灯${i + 1}</button>`)
+      }
+      lightContainer.innerHTML = lightElArr.join('')
+    }
+
+    function Uint8ArrayToHexString(bytes) {
+      return Array.from(bytes).map(byte => byte.toString(16).padStart(2, '0')).join(' ').toUpperCase();
+    }
+
+    function startCollect() {
+      const stationNo = document.querySelector("#stationNo").value || 1
+      const register = document.querySelector("#register").value || 20
+      generateLight(register)
+      let queryCmd = generateModbusRTUQuery(0x01, 20);
+      // let queryCmd = '03 03 00 00 00 14 45 C5'
+      sendData(queryCmd)
+    }
+
+    connectButton.addEventListener('click', async () => {
+      // 选择串行端口
+      port = await navigator.serial.requestPort();
+      // 打开串行端口
+
+      const portInfo = { name: port.getInfo().usbVendorId }; // 使用getInfo()来获取信息
+      localStorage.setItem('lastUsedPort', JSON.stringify(portInfo));
+      openPort()
+
+      // await readModbusMessage();
+    });
+
+
+    async function openPort() {
+      // 打开串行端口
+      await port.open({ baudRate: 9600 });
+      writer = port.writable.getWriter();
+      reader = port.readable.getReader();
+
+      // const textDecoder = new TextDecoderStream();
+      // port.readable.pipeTo(textDecoder.writable);
+      // reader = textDecoder.readable.getReader();
+
+      setBtnUseStatus(true)
+      connectButton.disabled = true;
+      log('串行端口已连接');
+
+    }
+
+    disconnectButton.addEventListener('click', async () => {
+      if (reader) {
+        await reader.cancel();
+        await reader.releaseLock();
+      }
+      if (writer) {
+        await writer.close();
+        await writer.releaseLock();
+      }
+      await port.close();
+
+      setBtnUseStatus(false)
+      connectButton.disabled = false;
+      log('串行端口已断开', 'INFO');
+    });
+
+    sendButton.addEventListener('click', async () => {
+      // const data = dataToSend.value;
+      // const messageBytes = new Uint8Array(data.match(/[\da-f]{2}/gi).map(byte => parseInt(byte, 16)));
+      const messageBytes = startLight()
+      await sendData(messageBytes)
+    });
+
+    clearLogBtn.addEventListener('click', () => {
+      logElement.innerHTML = ''
+    })
+
+    function setBtnUseStatus(canUse) {
+      document.querySelectorAll('.must-connect-btn').forEach(x => {
+        x.disabled = !canUse;
+      })
+    }
+
+    function startLight() {
+      // 1~16号灯亮
+      // 01 06 00 0A FF FF A8 78
+
+      // 1、2号灯亮
+      // 01 06 00 0A 00 03 E9 C9
+
+      // 1号灯亮
+      // 01 06 00 0A 00 01 68 08
+
+      // 构造指令的前半部分（不包括CRC）
+      let query = new Uint8Array(8);
+      query[0] = 0x01; // 设备地址
+      query[1] = 0x06; // 功能码，读保持寄存器
+      query[2] = 0x00; // 起始地址高位
+      query[3] = 0x0A; // 起始地址低位
+      query[4] = 0xFF; // 寄存器数量高位
+      query[5] = 0xFF; // 寄存器数量低位
+      query[6] = 0xA8; // 寄存器数量低位
+      query[7] = 0x78; // 寄存器数量低位
+      return query
+
+      // 计算CRC
+      // let crc = calculateCRC(query, 6);
+      // let fullQuery = new Uint8Array(8);
+
+      // fullQuery.set(query);
+      // fullQuery[6] = A8; // CRC低位
+      // fullQuery[7] = 78; // CRC高位
+      // return fullQuery;
+    }
+
+    function generateModbusRTUQuery(deviceAddress, registerCount) {
+      // 构造指令的前半部分（不包括CRC）
+      let query = new Uint8Array(6);
+      query[0] = deviceAddress; // 设备地址
+      query[1] = 0x03; // 功能码，读保持寄存器
+      query[2] = 0x00; // 起始地址高位
+      query[3] = 0x00; // 起始地址低位
+      query[4] = (registerCount >> 8) & 0xFF; // 寄存器数量高位
+      query[5] = registerCount & 0xFF; // 寄存器数量低位
+
+      // 计算CRC
+      let crc = calculateCRC(query, 6);
+      let fullQuery = new Uint8Array(8);
+
+      fullQuery.set(query);
+      fullQuery[6] = crc & 0xFF; // CRC低位
+      fullQuery[7] = (crc >> 8) & 0xFF; // CRC高位
+      // fullQuery[8] = 0x0A
+      return fullQuery;
+    }
+
+    function calculateCRC(buf, len) {
+      let crc = 0xFFFF;
+      for (let pos = 0; pos < len; pos++) {
+        crc ^= buf[pos]; // XOR byte into least sig. byte of crc
+
+        for (let i = 8; i !== 0; i--) { // Loop over each bit
+          if ((crc & 0x0001) !== 0) { // If the LSB is set
+            crc >>= 1; // Shift right and XOR 0xA001
+            crc ^= 0xA001;
+          } else { // Else LSB is not set
+            crc >>= 1; // Just shift right
+          }
+        }
+      }
+      // Note, this algorithm is reversed order from Modbus documentation
+      return crc;
+    }
+
+    async function sendData(data) {
+      // const writer = port.writable.getWriter();
+      if (data && writer) {
+        const res = await writer.write(data);
+        const originText = Uint8ArrayToHexString(data)
+        log(`已发送数据: ${originText}`, 'WRITE');
+        // writer.releaseLock()
+        await readModbusMessage()
+      }
+    }
+
+    // async function readModbusMessage() {
+    //   let done, value;
+    //   let dataBuffer = new Uint8Array();
+    //   const TIMEOUT = 1000; // 根据实际需要调整
+    //   const MESSAGE_GAP = 200; // 根据波特率和实际需要进行调整，可能需要减小这个值
+
+    //   try {
+    //     while (true) {
+    //       const readPromise = reader.read();
+    //       const timeoutPromise = new Promise((resolve, reject) => {
+    //         setTimeout(() => reject(new Error('Read timeout')), TIMEOUT);
+    //       });
+
+    //       ({ done, value } = await Promise.race([readPromise, timeoutPromise]));
+
+    //       if (done) {
+    //         console.log("Stream completed.");
+    //         break;
+    //       }
+
+    //       // 更新数据缓冲区
+    //       let tempBuffer = new Uint8Array(dataBuffer.length + value.length);
+    //       tempBuffer.set(dataBuffer);
+    //       tempBuffer.set(value, dataBuffer.length);
+    //       dataBuffer = tempBuffer;
+
+    //       // 短暂等待，检查是否还有更多数据即将到来
+    //       await new Promise(resolve => setTimeout(resolve, MESSAGE_GAP));
+
+    //       // 检查是否有新数据读取，如果没有，则假定报文结束
+    //       if (tempBuffer.length === dataBuffer.length) {
+    //         break; // 没有新数据，报文读取结束
+    //       }
+    //     }
+
+    //     const hexString = Array.from(dataBuffer, byte => byte.toString(16).padStart(2, '0')).join(' ');
+    //     log(`收到数据: ${hexString}`, 'READ');
+    //   } catch (error) {
+    //     console.error('Error reading data:', error);
+    //   }
+    // }
+
+    async function readModbusMessage() {
+      let done, value;
+      let dataBuffer = new Uint8Array();
+
+      try {
+        while (true) {
+          const readResult = await reader.read();
+          ({ done, value } = readResult);
+
+          if (done) {
+            console.log("Stream completed.");
+            break;
+          }
+
+          // 追加读取到的数据到缓冲区
+          let tempBuffer = new Uint8Array(dataBuffer.length + value.length);
+          tempBuffer.set(dataBuffer);
+          tempBuffer.set(value, dataBuffer.length);
+          dataBuffer = tempBuffer;
+
+          // 如果缓冲区内的数据足够解析出功能码和长度，则尝试解析
+          if (dataBuffer.length >= 2) {
+            const functionCode = dataBuffer[1];
+            const expectedLength = calculateExpectedLength(dataBuffer);
+
+            // 如果已经接收到足够的数据，则打印报文
+            if (dataBuffer.length >= expectedLength) {
+              const hexString = Array.from(dataBuffer.slice(0, expectedLength), byte => byte.toString(16).padStart(2, '0')).join(' ');
+              console.log(`收到完整报文: ${hexString}`);
+              // 将已处理的报文数据从缓冲区移除
+              dataBuffer = dataBuffer.slice(expectedLength);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error reading data:', error);
+      }
+    }
+
+    // 根据功能码和数据长度计算报文的预期总长度
+    function calculateExpectedLength(buffer) {
+      const functionCode = buffer[1];
+      switch (functionCode) {
+        case 0x03: // 读保持寄存器
+        case 0x04: // 读输入寄存器
+          // 这些功能码的响应报文包含字节数字段（1字节），后跟数据和CRC
+          if (buffer.length > 2) {
+            const byteCount = buffer[2];
+            return 3 + byteCount + 2; // 地址(1) + 功能码(1) + 字节数(1) + 数据(N) + CRC(2)
+          }
+          break;
+        // 根据需要添加更多的功能码处理逻辑
+        default:
+          console.log(`未处理的功能码: ${functionCode}`);
+          return Infinity; // 返回一个大数值以防止错误地判定为完成
+      }
+      return Infinity; // 如果数据不足以判断长度，则返回一个大数值
+    }
+
+
+    // ⬆︎⬆︎⬇︎⬇︎⬅︎
+    function log(message, type = "INFO") {
+      const div = document.createElement('div');
+      const flag = { INFO: '▶︎', READ: '⬇︎', WRITE: '⬆︎' }
+      div.textContent = `【${flag[type]}】 ${message}`;
+      div.classList.add('log-item')
+      div.classList.add(type.toLowerCase())
+      logElement.appendChild(div);
+      logElement.scrollTop = logElement.scrollHeight;
+    }
+
+    async function usePrePort() {
+      const savedPortInfo = JSON.parse(localStorage.getItem('lastUsedPort'));
+      if (savedPortInfo) {
+        const ports = await navigator.serial.getPorts();
+        const previouslyUsedPort = ports.find(port => port.getInfo().usbVendorId === savedPortInfo.name);
+        if (previouslyUsedPort) {
+          port = previouslyUsedPort
+          // 提示用户是否想要连接到此端口
+          console.log("发现之前使用的端口，尝试连接...");
+          // 这里需要实现连接逻辑
+          await openPort()
+        }
+      }
+    }
+
+    function init() {
+      setBtnUseStatus(false)
+      usePrePort()
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+
+
+  </script>
+
+</body>
+
+</html>
