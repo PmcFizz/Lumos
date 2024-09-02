@@ -75,7 +75,7 @@ function updateContent() {
 
 i18next.init(
   {
-    lng: "zh", // 这里可以根据用户设置或浏览器语言自动设置
+    lng: "en", // 这里可以根据用户设置或浏览器语言自动设置
     debug: true,
     resources: resources,
   },

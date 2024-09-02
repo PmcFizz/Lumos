@@ -1,6 +1,3 @@
-/**
- * 不用费劲巴拉地破解了，我准备开源啦。
- */
 const express = require("express");
 const http = require("http");
 const WebSocket = require("ws");
